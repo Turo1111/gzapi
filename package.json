@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "api golozur",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "lint": "ts-standard",
     "dev": "nodemon ./src/app.ts",
-    "tsc": "tsc"
+    "build": "tsc",
+    "start": "node ./dist/app.js"
   },
   "author": "turo1111",
   "license": "ISC",
