@@ -13,7 +13,6 @@ interface RequestExt extends Request {
 const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => {
   try {
     const { id } = params
-    console.log(id)
     const response = await getProduct(new Types.ObjectId(id))
     res.send(response)
   } catch (e) {
@@ -30,25 +29,25 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
       proveedor: body.proveedor
     }
 
-    if (body.categoria !== '') {
+    if (body.categoria !== '' && body.categoria !== 1 && body.categoria !== undefined) {
       filter.categoria = new Types.ObjectId(body.categoria)
     } else {
       delete filter.categoria
     }
 
-    if (body.marca !== '') {
+    if (body.marca !== '' && body.marca !== 1 && body.marca !== undefined) {
       filter.marca = new Types.ObjectId(body.marca)
     } else {
       delete filter.marca
     }
 
-    if (body.proveedor !== '') {
+    if (body.proveedor !== '' && body.proveedor !== 1 && body.proveedor !== undefined) {
       filter.proveedor = new Types.ObjectId(body.proveedor)
     } else {
       delete filter.proveedor
     }
 
-    if (input !== undefined) {
+    if (input !== undefined || filter.categoria !== undefined || filter.marca !== undefined) {
       const response = await getProductsSearch(input, filter)
       res.send(response)
     } else {
@@ -62,11 +61,10 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
 const uptdateItem = async ({ params, body }: Request, res: Response): Promise<void> => {
   try {
     const { id } = params
-    console.log(body)
     const response = await updateProduct(new Types.ObjectId(id), { ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
     emitSocket('product', {
       action: 'update',
-      data: response
+      data: body
     })
     res.send(response)
   } catch (e) {

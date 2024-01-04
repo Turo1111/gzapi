@@ -29,7 +29,9 @@ const getItems = async (_: RequestExt, res: Response): Promise<void> => {
 const uptdateItem = async ({ params, body }: Request, res: Response): Promise<void> => {
   try {
     const { id } = params
+    console.log(body)
     const response = await updateProvider(new Types.ObjectId(id), body)
+    console.log(response)
     emitSocket('provider', {
       action: 'update',
       data: body
@@ -42,7 +44,7 @@ const uptdateItem = async ({ params, body }: Request, res: Response): Promise<vo
 const postItem = async ({ body }: Request, res: Response): Promise<void> => {
   try {
     const response = await insertProvider(body)
-    emitSocket('brand', {
+    emitSocket('provider', {
       action: 'create',
       data: response
     })

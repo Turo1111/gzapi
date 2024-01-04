@@ -1,5 +1,5 @@
-import ProviderModel from '../models/provider';
-import { Provider } from './../interfaces/product.interface';
+import ProviderModel from '../models/provider'
+import { Provider } from './../interfaces/product.interface'
 import { Types } from 'mongoose'
 
 const insertProvider = async (item: Provider): Promise<Provider> => {
@@ -13,12 +13,12 @@ const getProviders = async (): Promise<Provider[]> => {
 }
 
 const getProvider = async (id: Types.ObjectId): Promise<any> => {
-  const response = await ProviderModel.find({_id: id})
+  const response = await ProviderModel.find({ _id: id })
   return response
 }
 
 const updateProvider = async (id: Types.ObjectId, item: Provider): Promise<any> => {
-  const response = await ProviderModel.updateOne({_id: id},{$set: item})
+  const response = await ProviderModel.updateOne({ _id: id }, { $set: item })
   return response
 }
 

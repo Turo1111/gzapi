@@ -45,9 +45,12 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
           precioBulto: 1,
           precioCompra: 1,
           precioUnitario: 1,
-          proveedor: '$proveedor.descripcion',
-          marca: '$marca.descripcion',
-          categoria: '$categoria.descripcion'
+          categoria: '$categoria._id',
+          proveedor: '$proveedor._id',
+          marca: '$marca._id',
+          NameProveedor: '$proveedor.descripcion',
+          NameMarca: '$marca.descripcion',
+          NameCategoria: '$categoria.descripcion'
         }
       },
       {
@@ -58,27 +61,36 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
       },
       {
         $unwind: '$marca'
+      },
+      {
+        $unwind: '$NameProveedor'
+      },
+      {
+        $unwind: '$NameMarca'
+      },
+      {
+        $unwind: '$NameCategoria'
       }
     ]
   ).skip(skip).limit(limit)
 }
 
 const getProductsSearch = async (input: string, filter: Filter): Promise<Product[]> => {
-  const query = []
-
-  if (filter.categoria !== undefined) {
-    query.push({ categoria: filter.categoria })
+  let query: any = {
   }
 
-  if (filter.proveedor !== undefined) {
-    query.push({ proveedor: filter.proveedor })
+  if (input !== '') {
+    query.descripcion = {
+      $regex: input,
+      $options: 'i'
+    }
   }
 
-  if (filter.marca !== undefined) {
-    query.push({ marca: filter.marca })
+  if (filter.categoria !== undefined || filter.marca !== undefined || filter.proveedor !== undefined) {
+    query = Object.assign({}, query, filter)
   }
 
-  console.log(query)
+  console.log('query', query)
 
   return await ProductModel.aggregate(
     [
@@ -91,24 +103,55 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
         }
       },
       {
+        $lookup: {
+          from: 'brands',
+          localField: 'marca',
+          foreignField: '_id',
+          as: 'marca'
+        }
+      },
+      {
+        $lookup: {
+          from: 'providers',
+          localField: 'proveedor',
+          foreignField: '_id',
+          as: 'proveedor'
+        }
+      },
+      {
         $project: {
           descripcion: 1,
           stock: 1,
           codigoBarra: 1,
           precioUnitario: 1,
-          categoria: '$categoria.descripcion'
+          categoria: '$categoria._id',
+          marca: '$marca._id',
+          proveedor: '$proveedor._id',
+          NameMarca: '$marca.descripcion',
+          NameCategoria: '$categoria.descripcion',
+          NameProveedor: '$proveedor.descripcion'
         }
       },
       {
         $unwind: '$categoria'
       },
       {
-        $match: {
-          descripcion: {
-            $regex: input,
-            $options: 'i'
-          }
-        }
+        $unwind: '$marca'
+      },
+      {
+        $unwind: '$proveedor'
+      },
+      {
+        $unwind: '$NameMarca'
+      },
+      {
+        $unwind: '$NameCategoria'
+      },
+      {
+        $unwind: '$NameProveedor'
+      },
+      {
+        $match: query
       }
     ]
   )
