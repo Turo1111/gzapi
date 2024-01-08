@@ -13,7 +13,8 @@ export interface Product {
   precioBulto?: number
   categoria: ObjectId
   marca: ObjectId
-  proveedor: ObjectId
+  proveedor: ObjectId,
+  path?: string
 }
 
 interface Peso {
