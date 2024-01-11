@@ -61,6 +61,7 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
 const uptdateItem = async ({ params, body }: Request, res: Response): Promise<void> => {
   try {
     const { id } = params
+    console.log(body)
     const response = await updateProduct(new Types.ObjectId(id), { ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
     emitSocket('product', {
       action: 'update',
@@ -119,6 +120,7 @@ const uptdateItems = async ({ body }: Request, res: Response): Promise<void> => 
 }
 const postItem = async ({ body }: Request, res: Response): Promise<void> => {
   try {
+    console.log('body', body)
     const response = await insertProduct({ ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
     emitSocket('product', {
       action: 'create',
@@ -137,4 +139,24 @@ const deleteItem = (_: Request, res: Response): void => {
   }
 }
 
-export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems }
+const uploadImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.send(req.file)
+  } catch (e) {
+    handleHttp(res, 'ERROR_POST_ITEM', e)
+  }
+}
+
+const getImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('pase por aqui', req.params.image)
+    const image = req.params.image
+    const path = `../../public/image/${image}`
+    console.log(path)
+    res.sendFile(path)
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_ITEM', e)
+  }
+}
+
+export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage }

@@ -166,7 +166,7 @@ const getProduct = async (id: Types.ObjectId): Promise<any> => {
             $eq: id
           }
         }
-      },
+      }/* ,
       {
         $lookup: {
           from: 'categories',
@@ -227,7 +227,7 @@ const getProduct = async (id: Types.ObjectId): Promise<any> => {
       },
       {
         $unwind: '$NameCategoria'
-      }
+      } */
     ]
   )
 }
