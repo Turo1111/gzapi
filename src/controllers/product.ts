@@ -61,7 +61,6 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
 const uptdateItem = async ({ params, body }: Request, res: Response): Promise<void> => {
   try {
     const { id } = params
-    console.log(body)
     const response = await updateProduct(new Types.ObjectId(id), { ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
     emitSocket('product', {
       action: 'update',
@@ -120,7 +119,6 @@ const uptdateItems = async ({ body }: Request, res: Response): Promise<void> => 
 }
 const postItem = async ({ body }: Request, res: Response): Promise<void> => {
   try {
-    console.log('body', body)
     const response = await insertProduct({ ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
     emitSocket('product', {
       action: 'create',

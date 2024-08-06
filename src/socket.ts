@@ -29,6 +29,7 @@ export function getIO (): ServerType {
 
 export function emitSocket (type: string, params: Object) {
   try {
+    console.log(type, params)
     // @ts-expect-error
     getIO().emit(type, params)
   } catch (error) {

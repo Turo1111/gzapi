@@ -13,12 +13,12 @@ const getBrands = async (): Promise<Brand[]> => {
 }
 
 const getBrand = async (id: Types.ObjectId): Promise<any> => {
-  const response = await BrandModel.find({_id: id})
+  const response = await BrandModel.find({ _id: id })
   return response
 }
 
 const updateBrand = async (id: Types.ObjectId, item: Brand): Promise<any> => {
-  const response = await BrandModel.updateOne({_id: id},{$set: item})
+  const response = await BrandModel.updateOne({ _id: id }, { $set: item })
   return response
 }
 

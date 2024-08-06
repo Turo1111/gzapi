@@ -1,11 +1,11 @@
 import { Schema, model } from 'mongoose'
-import { Categorie} from '../interfaces/product.interface'
+import { Categorie } from '../interfaces/product.interface'
 
 const CategorieSchema = new Schema<Categorie>(
   {
-    descripcion : {
-        type: String,
-        require: true
+    descripcion: {
+      type: String,
+      require: true
     }
   },
   {
