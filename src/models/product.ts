@@ -57,6 +57,9 @@ const ProductSchema = new Schema<Product>(
       type: Schema.ObjectId,
       ref: 'Proveedor',
       required: true
+    },
+    path: {
+      type: String
     }
   },
   {

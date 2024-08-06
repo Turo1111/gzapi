@@ -137,4 +137,24 @@ const deleteItem = (_: Request, res: Response): void => {
   }
 }
 
-export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems }
+const uploadImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.send(req.file)
+  } catch (e) {
+    handleHttp(res, 'ERROR_POST_ITEM', e)
+  }
+}
+
+const getImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log('pase por aqui', req.params.image)
+    const image = req.params.image
+    const path = `../../public/image/${image}`
+    console.log(path)
+    res.sendFile(path)
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_ITEM', e)
+  }
+}
+
+export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage }

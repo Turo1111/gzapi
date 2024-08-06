@@ -14,6 +14,7 @@ export interface Product {
   categoria: ObjectId
   marca: ObjectId
   proveedor: ObjectId
+  path?: string
 }
 
 interface Peso {
