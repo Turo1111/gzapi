@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+/* import { NextFunction, Request, Response } from 'express'
 import multer, { diskStorage } from 'multer'
 import sharp from 'sharp'
 
@@ -42,3 +42,4 @@ export const compressImage = async (req: Request, _: Response, next: NextFunctio
 }
 
 export default multerMiddleware
+ */

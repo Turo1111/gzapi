@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, unlinkSync } from 'fs'
+/* import { existsSync, mkdirSync, unlinkSync } from 'fs'
 import path from 'path'
 import sharp from 'sharp'
 
@@ -45,3 +45,4 @@ function deleteImage (filename: string): void {
 }
 
 export { deleteImage, saveImages }
+ */
