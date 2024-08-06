@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { checkJwt } from '../middleware/session'
-import { deleteItem, getImage, getItem, getItems, postItem, uploadImage, uptdateItem, uptdateItems } from '../controllers/product'
+import { deleteItem, getImage, getItem, getItems, postItem, uptdateItem, uptdateItems } from '../controllers/product'
 /* import multerMiddleware, { compressImage } from '../middleware/file' */
 
 const router = Router()
