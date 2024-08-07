@@ -237,6 +237,11 @@ const updateProduct = async (id: Types.ObjectId, item: Product): Promise<any> =>
   return response
 }
 
+const qtyProduct = async (): Promise<any> => {
+  const response = await ProductModel.countDocuments()
+  return response
+}
+
 export interface Filter {
   categoria?: string
   proveedor?: string
@@ -263,4 +268,4 @@ const findProducts = async (filter: Filter): Promise<any> => {
   return response
 }
 
-export { getProduct, getProducts, insertProduct, updateProduct, getProductsSearch, findProducts }
+export { getProduct, getProducts, insertProduct, updateProduct, getProductsSearch, findProducts, qtyProduct }

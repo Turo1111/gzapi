@@ -3,7 +3,7 @@ import { handleHttp } from '../utils/error.handle'
 import { Types } from 'mongoose'
 import { JwtPayload } from 'jsonwebtoken'
 import { emitSocket } from '../socket'
-import { findProducts, getProduct, getProducts, getProductsSearch, insertProduct, updateProduct } from '../services/product'
+import { findProducts, getProduct, getProducts, getProductsSearch, insertProduct, qtyProduct, updateProduct } from '../services/product'
 import { Product } from '../interfaces/product.interface'
 
 interface RequestExt extends Request {
@@ -52,7 +52,8 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
       res.send(response)
     } else {
       const response = await getProducts(parseInt(skip), parseInt(limit))
-      res.send(response)
+      const cantidad = await qtyProduct()
+      res.send({ array: response, longitud: cantidad })
     }
   } catch (e) {
     handleHttp(res, 'ERROR_GET_ITEMS')
