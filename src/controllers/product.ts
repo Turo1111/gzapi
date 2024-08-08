@@ -120,6 +120,7 @@ const uptdateItems = async ({ body }: Request, res: Response): Promise<void> => 
 }
 const postItem = async ({ body }: Request, res: Response): Promise<void> => {
   try {
+    console.log(body)
     const response = await insertProduct({ ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
     emitSocket('product', {
       action: 'create',

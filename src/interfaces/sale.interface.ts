@@ -12,9 +12,9 @@ export interface Sale {
 }
 
 export interface ItemSale {
-  _id: Types.ObjectId
-  idVenta: ObjectId
-  idProducto: ObjectId
+  _id?: Types.ObjectId
+  idVenta: Types.ObjectId
+  idProducto: Types.ObjectId
   cantidad: Number
   total: Number
 }
