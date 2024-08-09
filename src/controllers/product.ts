@@ -3,8 +3,9 @@ import { handleHttp } from '../utils/error.handle'
 import { Types } from 'mongoose'
 import { JwtPayload } from 'jsonwebtoken'
 import { emitSocket } from '../socket'
-import { findProducts, getProduct, getProducts, getProductsSearch, insertProduct, qtyProduct, updateProduct } from '../services/product'
+import { findProducts, getAllProducts, getProduct, getProducts, getProductsSearch, insertProduct, qtyProduct, updateProduct } from '../services/product'
 import { Product } from '../interfaces/product.interface'
+import { ObjectId } from 'mongodb'
 
 interface RequestExt extends Request {
   user?: string | JwtPayload | undefined | any
@@ -30,25 +31,26 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
     }
 
     if (body.categoria !== '' && body.categoria !== 1 && body.categoria !== undefined) {
-      filter.categoria = new Types.ObjectId(body.categoria)
+      filter.categoria = ObjectId.createFromHexString(body.categoria)
     } else {
       delete filter.categoria
     }
 
     if (body.marca !== '' && body.marca !== 1 && body.marca !== undefined) {
-      filter.marca = new Types.ObjectId(body.marca)
+      filter.marca = ObjectId.createFromHexString(body.marca)
     } else {
       delete filter.marca
     }
 
     if (body.proveedor !== '' && body.proveedor !== 1 && body.proveedor !== undefined) {
-      filter.proveedor = new Types.ObjectId(body.proveedor)
+      filter.proveedor = ObjectId.createFromHexString(body.proveedor)
     } else {
       delete filter.proveedor
     }
 
-    if (input !== undefined || filter.categoria !== undefined || filter.marca !== undefined) {
+    if (input !== undefined || filter.categoria !== undefined || filter.marca !== undefined || filter.proveedor !== undefined) {
       const response = await getProductsSearch(input, filter)
+      console.log(response.length)
       res.send(response)
     } else {
       const response = await getProducts(parseInt(skip), parseInt(limit))
@@ -159,4 +161,13 @@ const getImage = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage }
+const getAllItems = async (_: RequestExt, res: Response): Promise<void> => {
+  try {
+    const response = await getAllProducts()
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_ITEMS')
+  }
+}
+
+export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage, getAllItems }

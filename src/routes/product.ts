@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import { checkJwt } from '../middleware/session'
-import { deleteItem, getImage, getItem, getItems, postItem, uptdateItem, uptdateItems } from '../controllers/product'
+import { deleteItem, getAllItems, getImage, getItem, getItems, postItem, uptdateItem, uptdateItems } from '../controllers/product'
 /* import multerMiddleware, { compressImage } from '../middleware/file' */
 
 const router = Router()
 
 router.get('/:id', checkJwt, getItem)
+router.get('/', checkJwt, getAllItems)
 router.post('/skip', getItems)
 router.post('/search', getItems)
 router.post('/', checkJwt, postItem)

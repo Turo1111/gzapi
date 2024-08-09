@@ -7,6 +7,74 @@ const insertProduct = async (item: Product): Promise<Product> => {
   return responseInsert
 }
 
+const getAllProducts = async (): Promise<Product[]> => {
+  return await ProductModel.aggregate(
+    [
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoria',
+          foreignField: '_id',
+          as: 'categoria'
+        }
+      },
+      {
+        $lookup: {
+          from: 'brands',
+          localField: 'marca',
+          foreignField: '_id',
+          as: 'marca'
+        }
+      },
+      {
+        $lookup: {
+          from: 'providers',
+          localField: 'proveedor',
+          foreignField: '_id',
+          as: 'proveedor'
+        }
+      },
+      {
+        $project: {
+          descripcion: 1,
+          stock: 1,
+          codigoBarra: 1,
+          peso: 1,
+          sabor: 1,
+          bulto: 1,
+          precioBulto: 1,
+          precioCompra: 1,
+          precioUnitario: 1,
+          categoria: '$categoria._id',
+          proveedor: '$proveedor._id',
+          marca: '$marca._id',
+          NameProveedor: '$proveedor.descripcion',
+          NameMarca: '$marca.descripcion',
+          NameCategoria: '$categoria.descripcion'
+        }
+      },
+      {
+        $unwind: '$categoria'
+      },
+      {
+        $unwind: '$proveedor'
+      },
+      {
+        $unwind: '$marca'
+      },
+      {
+        $unwind: '$NameProveedor'
+      },
+      {
+        $unwind: '$NameMarca'
+      },
+      {
+        $unwind: '$NameCategoria'
+      }
+    ]
+  )
+}
+
 const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
   return await ProductModel.aggregate(
     [
@@ -268,4 +336,4 @@ const findProducts = async (filter: Filter): Promise<any> => {
   return response
 }
 
-export { getProduct, getProducts, insertProduct, updateProduct, getProductsSearch, findProducts, qtyProduct }
+export { getProduct, getProducts, insertProduct, updateProduct, getProductsSearch, findProducts, qtyProduct, getAllProducts }
