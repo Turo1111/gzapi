@@ -118,7 +118,8 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
           marca: '$marca._id',
           NameProveedor: '$proveedor.descripcion',
           NameMarca: '$marca.descripcion',
-          NameCategoria: '$categoria.descripcion'
+          NameCategoria: '$categoria.descripcion',
+          createdAt: 1
         }
       },
       {
@@ -197,7 +198,8 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
           proveedor: '$proveedor._id',
           NameMarca: '$marca.descripcion',
           NameCategoria: '$categoria.descripcion',
-          NameProveedor: '$proveedor.descripcion'
+          NameProveedor: '$proveedor.descripcion',
+          createdAt: 1
         }
       },
       {

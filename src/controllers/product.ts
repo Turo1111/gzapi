@@ -55,6 +55,7 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
     } else {
       const response = await getProducts(parseInt(skip), parseInt(limit))
       const cantidad = await qtyProduct()
+      console.log(response.length, cantidad)
       res.send({ array: response, longitud: cantidad })
     }
   } catch (e) {
