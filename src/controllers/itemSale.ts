@@ -4,7 +4,7 @@ import { emitSocket } from '../socket'
 import { handleHttp } from '../utils/error.handle'
 import { JwtPayload } from 'jsonwebtoken'
 import { Types } from 'mongoose'
-import { getItemSale, getItemSales, insertItemSale } from '../services/itemSale'
+import { deleteItemsSale, getItemSale, getItemSales, insertItemSale } from '../services/itemSale'
 
 interface RequestExt extends Request {
   user?: string | JwtPayload | undefined | any
@@ -41,4 +41,14 @@ const getItems = async (_: RequestExt, res: Response): Promise<void> => {
   }
 }
 
-export { postItem, getItem, getItems }
+const deleteItem = async ({ params }: RequestExt, res: Response): Promise<void> => {
+  try {
+    const { id } = params
+    const response = await deleteItemsSale(new Types.ObjectId(id))
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_DELETE_ITEM')
+  }
+}
+
+export { postItem, getItem, getItems, deleteItem }

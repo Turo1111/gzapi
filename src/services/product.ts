@@ -70,6 +70,9 @@ const getAllProducts = async (): Promise<Product[]> => {
       },
       {
         $unwind: '$NameCategoria'
+      },
+      {
+        $sort: { descripcion: 1 } 
       }
     ]
   )
@@ -139,6 +142,9 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
       },
       {
         $unwind: '$NameCategoria'
+      },
+      {
+        $sort: { descripcion: 1 } 
       }
     ]
   ).skip(skip).limit(limit)
@@ -222,6 +228,9 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
       },
       {
         $match: query
+      },
+      {
+        $sort: { descripcion: 1 } 
       }
     ]
   )
@@ -236,7 +245,7 @@ const getProduct = async (id: Types.ObjectId): Promise<any> => {
             $eq: id
           }
         }
-      }/* ,
+      },
       {
         $lookup: {
           from: 'categories',
@@ -297,7 +306,7 @@ const getProduct = async (id: Types.ObjectId): Promise<any> => {
       },
       {
         $unwind: '$NameCategoria'
-      } */
+      }
     ]
   )
 }

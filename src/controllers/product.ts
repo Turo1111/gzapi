@@ -66,6 +66,7 @@ const uptdateItem = async ({ params, body }: Request, res: Response): Promise<vo
   try {
     const { id } = params
     const response = await updateProduct(new Types.ObjectId(id), { ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
+    console.log('body update', body)
     emitSocket('product', {
       action: 'update',
       data: body

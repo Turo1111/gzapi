@@ -1,11 +1,11 @@
 
 import { Request, Response } from 'express'
-import { getSale, getSales, insertSale } from '../services/sale'
+import { getSale, getSales, getSalesLimit, insertSale, qtySale, updateSale } from '../services/sale'
 import { emitSocket } from '../socket'
 import { handleHttp } from '../utils/error.handle'
 import { JwtPayload } from 'jsonwebtoken'
 import { Types } from 'mongoose'
-import { getItemSale, insertItemSale } from '../services/itemSale'
+import { getItemSale, insertItemSale, updateItemsSale } from '../services/itemSale'
 
 interface RequestExt extends Request {
   user?: string | JwtPayload | undefined | any
@@ -15,7 +15,6 @@ const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void
   try {
     console.log({ ...body, user: new Types.ObjectId(user.id) })
     const response = await insertSale({ ...body, user: new Types.ObjectId(user.id) })
-    console.log(response._id)
     await Promise.all(
       body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id }))
     )
@@ -40,13 +39,47 @@ const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => 
     handleHttp(res, 'ERROR_GET_ITEM')
   }
 }
-const getItems = async (_: RequestExt, res: Response): Promise<void> => {
+
+const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
   try {
-    const response = await getSales()
-    res.send(response)
+    const { input, skip, limit } = body
+
+    if (input !== undefined) {
+      const response = await getSales(input)
+      console.log(response.length)
+      res.send(response)
+    } else {
+      const response = await getSalesLimit(parseInt(skip), parseInt(limit))
+      const cantidad = await qtySale()
+      res.send({ array: response, longitud: cantidad })
+    }
   } catch (e) {
     handleHttp(res, 'ERROR_GET_ITEMS')
   }
 }
 
-export { postItem, getItem, getItems }
+const updateItem = async ({ params, body, user }: RequestExt, res: Response): Promise<void> => {
+  try {
+    const { id } = params
+    const response = await updateSale(new Types.ObjectId(id), { ...body, user: new Types.ObjectId(user.id) })
+    await Promise.all(
+      body.itemsSale.map(async (item: any) => {
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        if (item.idVenta) {
+          await updateItemsSale(new Types.ObjectId(item._id), { ...item })
+        } else {
+          await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id) })
+        }
+      })
+    )
+    emitSocket('sale', {
+      action: 'update',
+      data: response
+    })
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_PATCH_ITEM', e)
+  }
+}
+
+export { postItem, getItem, getItems, updateItem }

@@ -7,8 +7,26 @@ const insertBuy = async (item: Buy): Promise<Buy> => {
   return responseInsert
 }
 
-const getBuys = async (): Promise<Buy[]> => {
-  const response = await BuyModel.find({})
+const getBuys = async (input: string): Promise<Buy[]> => {
+  const query: any = {
+  }
+
+  if (input !== '') {
+    query.cliente = {
+      $regex: input,
+      $options: 'i'
+    }
+  }
+
+  const response = await BuyModel.aggregate([{
+    $match: query
+  }])
+
+  return response
+}
+
+const getBuysLimit = async (skip: number, limit: number): Promise<Buy[]> => {
+  const response = await BuyModel.find({}).skip(skip).limit(limit)
   return response
 }
 
@@ -17,4 +35,9 @@ const getBuy = async (id: Types.ObjectId): Promise<Buy[]> => {
   return response
 }
 
-export { insertBuy, getBuys, getBuy }
+const qtyBuy = async (): Promise<any> => {
+  const response = await BuyModel.countDocuments()
+  return response
+}
+
+export { insertBuy, getBuys, getBuy, getBuysLimit, qtyBuy }

@@ -78,4 +78,14 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
   )
 }
 
-export { insertItemSale, getItemSales, getItemSale }
+const updateItemsSale = async (id: Types.ObjectId, item: ItemSale): Promise<any> => {
+  const response = await ItemSaleModel.updateOne({ _id: id }, { $set: item })
+  return response
+}
+
+const deleteItemsSale = async (id: Types.ObjectId): Promise<any> => {
+  const response = await ItemSaleModel.deleteOne({ _id: id })
+  return response
+}
+
+export { insertItemSale, getItemSales, getItemSale, updateItemsSale, deleteItemsSale }

@@ -3,7 +3,7 @@ import { emitSocket } from '../socket'
 import { handleHttp } from '../utils/error.handle'
 import { JwtPayload } from 'jsonwebtoken'
 import { Types } from 'mongoose'
-import { getBuy, getBuys, insertBuy } from '../services/buy'
+import { getBuy, getBuys, getBuysLimit, insertBuy, qtyBuy } from '../services/buy'
 import { getItemBuy, insertItemBuy } from '../services/itemBuy'
 
 interface RequestExt extends Request {
@@ -38,10 +38,19 @@ const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => 
     handleHttp(res, 'ERROR_GET_ITEM')
   }
 }
-const getItems = async (_: RequestExt, res: Response): Promise<void> => {
+const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
   try {
-    const response = await getBuys()
-    res.send(response)
+    const { input, skip, limit } = body
+
+    if (input !== undefined) {
+      const response = await getBuys(input)
+      console.log(response.length)
+      res.send(response)
+    } else {
+      const response = await getBuysLimit(parseInt(skip), parseInt(limit))
+      const cantidad = await qtyBuy()
+      res.send({ array: response, longitud: cantidad })
+    }
   } catch (e) {
     handleHttp(res, 'ERROR_GET_ITEMS')
   }

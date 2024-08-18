@@ -7,8 +7,26 @@ const insertSale = async (item: Sale): Promise<Sale> => {
   return responseInsert
 }
 
-const getSales = async (): Promise<Sale[]> => {
-  const response = await SaleModel.find({})
+const getSales = async (input: string): Promise<Sale[]> => {
+  const query: any = {
+  }
+
+  if (input !== '') {
+    query.cliente = {
+      $regex: input,
+      $options: 'i'
+    }
+  }
+
+  const response = await SaleModel.aggregate([{
+    $match: query
+  }])
+
+  return response
+}
+
+const getSalesLimit = async (skip: number, limit: number): Promise<Sale[]> => {
+  const response = await SaleModel.find({}).skip(skip).limit(limit)
   return response
 }
 
@@ -17,4 +35,14 @@ const getSale = async (id: Types.ObjectId): Promise<Sale[]> => {
   return response
 }
 
-export { insertSale, getSale, getSales }
+const updateSale = async (id: Types.ObjectId, sale: Sale): Promise<any> => {
+  const response = await SaleModel.updateOne({ _id: id }, { $set: sale })
+  return response
+}
+
+const qtySale = async (): Promise<any> => {
+  const response = await SaleModel.countDocuments()
+  return response
+}
+
+export { insertSale, getSale, getSales, updateSale, qtySale, getSalesLimit }
