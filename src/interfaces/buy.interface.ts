@@ -6,9 +6,7 @@ export interface Buy {
   user: ObjectId
   proveedor: string
   total: Number
-  itemsBuy: [
-    ItemBuy
-  ]
+  itemsBuy: ItemBuy[]
 }
 
 export interface ItemBuy {

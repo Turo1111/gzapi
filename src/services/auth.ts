@@ -13,7 +13,7 @@ const registerNewUser = async ({ nickname, password }: Auth): Promise<Auth | str
 }
 
 const loginUser = async ({ nickname, password }: Auth): Promise<AuthWithToken | string> => {
-  const checkIs = await UserModel.findOne({ nickname })
+  const checkIs = await UserModel.findOne({ nickname: new RegExp(`^${nickname}$`, 'i') })
   if (checkIs == null) return 'NOT_FOUND_USER'
   const passwordHash = checkIs.password
   const isCorrect = await verified(password, passwordHash)

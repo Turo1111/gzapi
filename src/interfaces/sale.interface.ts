@@ -6,9 +6,7 @@ export interface Sale {
   user: ObjectId
   cliente: string
   total: Number
-  itemsSale: [
-    ItemSale
-  ]
+  itemsSale: ItemSale[]
 }
 
 export interface ItemSale {
