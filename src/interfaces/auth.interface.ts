@@ -5,5 +5,5 @@ export interface Auth {
 
 export interface AuthWithToken {
   token: string
-  user: string
+  nickname: string
 }
