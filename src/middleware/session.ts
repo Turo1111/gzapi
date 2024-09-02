@@ -21,7 +21,6 @@ const checkJwt = async (req: RequestExt, res: Response, next: NextFunction): Pro
       next()
     }
   } catch (e) {
-    console.log('no valida')
     res.status(400)
     res.send('SESSION_NO_VALIDA')
   }

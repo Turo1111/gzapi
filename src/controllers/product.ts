@@ -50,12 +50,10 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
 
     if (input !== undefined || filter.categoria !== undefined || filter.marca !== undefined || filter.proveedor !== undefined) {
       const response = await getProductsSearch(input, filter)
-      console.log(response.length)
       res.send(response)
     } else {
       const response = await getProducts(parseInt(skip), parseInt(limit))
       const cantidad = await qtyProduct()
-      console.log(response.length, cantidad)
       res.send({ array: response, longitud: cantidad })
     }
   } catch (e) {
@@ -66,7 +64,6 @@ const uptdateItem = async ({ params, body }: Request, res: Response): Promise<vo
   try {
     const { id } = params
     const response = await updateProduct(new Types.ObjectId(id), { ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
-    console.log('body update', body)
     emitSocket('product', {
       action: 'update',
       data: body
@@ -124,7 +121,6 @@ const uptdateItems = async ({ body }: Request, res: Response): Promise<void> => 
 }
 const postItem = async ({ body }: Request, res: Response): Promise<void> => {
   try {
-    console.log(body)
     const response = await insertProduct({ ...body, categoria: new Types.ObjectId(body.categoria), marca: new Types.ObjectId(body.marca), proveedor: new Types.ObjectId(body.proveedor) })
     emitSocket('product', {
       action: 'create',
@@ -153,10 +149,8 @@ const uploadImage = async (req: Request, res: Response): Promise<void> => {
 
 const getImage = async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log('pase por aqui', req.params.image)
     const image = req.params.image
     const path = `../../public/image/${image}`
-    console.log(path)
     res.sendFile(path)
   } catch (e) {
     handleHttp(res, 'ERROR_GET_ITEM', e)

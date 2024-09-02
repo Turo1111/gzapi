@@ -165,8 +165,6 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
     query = Object.assign({}, query, filter)
   }
 
-  console.log('query', query)
-
   return await ProductModel.aggregate(
     [
       {
@@ -311,7 +309,7 @@ const getProduct = async (id: Types.ObjectId): Promise<any> => {
   )
 }
 
-const updateProduct = async (id: Types.ObjectId, item: Product): Promise<any> => {
+const updateProduct = async (id: Types.ObjectId, item: Partial<Product>): Promise<any> => {
   const response = await ProductModel.updateOne({ _id: id }, { $set: item })
   return response
 }

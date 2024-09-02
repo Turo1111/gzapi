@@ -29,9 +29,7 @@ const getItems = async (_: RequestExt, res: Response): Promise<void> => {
 const uptdateItem = async ({ params, body }: Request, res: Response): Promise<void> => {
   try {
     const { id } = params
-    console.log(body)
     const response = await updateProvider(new Types.ObjectId(id), body)
-    console.log(response)
     emitSocket('provider', {
       action: 'update',
       data: body

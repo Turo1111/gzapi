@@ -15,4 +15,5 @@ export interface ItemSale {
   idProducto: Types.ObjectId
   cantidad: Number
   total: Number
+  estado: boolean
 }

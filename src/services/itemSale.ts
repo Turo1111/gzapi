@@ -3,7 +3,6 @@ import { ItemSale } from '../interfaces/sale.interface'
 import ItemSaleModel from '../models/itemSale'
 
 const insertItemSale = async (item: ItemSale): Promise<ItemSale> => {
-  console.log(item)
   const responseInsert = await ItemSaleModel.create(item)
   return responseInsert
 }
@@ -14,12 +13,12 @@ const getItemSales = async (): Promise<ItemSale[]> => {
 }
 
 const getItemSale = async (id: Types.ObjectId): Promise<any> => {
-  console.log('aca', id)
   return await ItemSaleModel.aggregate(
     [
       {
         $match: {
-          idVenta: id
+          idVenta: id,
+          estado: true
         }
       },
       {
@@ -78,7 +77,7 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
   )
 }
 
-const updateItemsSale = async (id: Types.ObjectId, item: ItemSale): Promise<any> => {
+const updateItemsSale = async (id: Types.ObjectId, item: Partial<ItemSale>): Promise<any> => {
   const response = await ItemSaleModel.updateOne({ _id: id }, { $set: item })
   return response
 }

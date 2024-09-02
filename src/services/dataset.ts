@@ -256,8 +256,6 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
       break; // Detener el ciclo si la semana no pertenece al mes actual
     }
 
-    console.log(start, end);
-
     const responseSale = await SaleModel.aggregate([
       { $match: { createdAt: { $gte: start, $lte: end } } },
       { $group: { _id: null, totalSales: { $sum: "$total" }, salesCount: { $sum: 1 } } }
@@ -302,8 +300,6 @@ const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response
     if (start.getFullYear() !== currentYear) {
       break; // Detener el ciclo si el mes no pertenece al año actual
     }
-
-    console.log(start, end);
 
     const responseSale = await SaleModel.aggregate([
       { $match: { createdAt: { $gte: start, $lte: end } } },

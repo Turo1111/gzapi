@@ -19,7 +19,16 @@ const ItemBuySchema = new Schema<ItemBuy>({
   total: {
     type: Number,
     require: true
+  },
+  precio: {
+    type: Number,
+    require: true
+  },
+  estado: {
+    type: Boolean,
+    require: true
   }
+
 },
 {
   timestamps: true,

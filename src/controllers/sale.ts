@@ -13,10 +13,9 @@ interface RequestExt extends Request {
 
 const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void> => {
   try {
-    console.log({ ...body, user: new Types.ObjectId(user.id) })
     const response = await insertSale({ ...body, user: new Types.ObjectId(user.id) })
     await Promise.all(
-      body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id }))
+      body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id, estado: true }))
     )
     emitSocket('sale', {
       action: 'create',
@@ -33,7 +32,6 @@ const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => 
     const { id } = params
     const response = await getSale(new Types.ObjectId(id))
     const response2 = await getItemSale(new Types.ObjectId(id))
-    console.log(response2)
     res.send({ r: response[0], itemsSale: response2 })
   } catch (e) {
     handleHttp(res, 'ERROR_GET_ITEM')
@@ -46,7 +44,6 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
 
     if (input !== undefined) {
       const response = await getSales(input)
-      console.log(response.length)
       res.send(response)
     } else {
       const response = await getSalesLimit(parseInt(skip), parseInt(limit))
@@ -68,7 +65,7 @@ const updateItem = async ({ params, body, user }: RequestExt, res: Response): Pr
         if (item.idVenta) {
           await updateItemsSale(new Types.ObjectId(item._id), { ...item })
         } else {
-          await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id) })
+          await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id), estado: true })
         }
       })
     )

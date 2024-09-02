@@ -41,7 +41,6 @@ const uptdateItem = async ({ params, body }: Request, res: Response): Promise<vo
 }
 const postItem = async ({ body }: Request, res: Response): Promise<void> => {
   try {
-    console.log(body)
     const response = await insertCategorie(body)
     emitSocket('categorie', {
       action: 'create',

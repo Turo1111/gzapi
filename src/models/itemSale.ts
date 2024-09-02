@@ -19,6 +19,10 @@ const ItemSaleSchema = new Schema<ItemSale>({
   total: {
     type: Number,
     require: true
+  },
+  estado: {
+    type: Boolean,
+    require: true
   }
 },
 {

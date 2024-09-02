@@ -3,7 +3,6 @@ import { ItemBuy } from '../interfaces/buy.interface'
 import ItemBuyModel from '../models/itemBuy'
 
 const insertItemBuy = async (item: ItemBuy): Promise<ItemBuy> => {
-  console.log(item)
   const responseInsert = await ItemBuyModel.create(item)
   return responseInsert
 }
@@ -14,12 +13,12 @@ const getItemBuys = async (): Promise<ItemBuy[]> => {
 }
 
 const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
-  console.log('aca', id)
   return await ItemBuyModel.aggregate(
     [
       {
         $match: {
-          idBuy: id
+          idBuy: id,
+          estado: true
         }
       },
       {
@@ -44,7 +43,8 @@ const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
           stock: '$producto.stock',
           peso: '$producto.peso',
           sabor: '$producto.sabor',
-          categoria: '$producto.categoria'
+          categoria: '$producto.categoria',
+          precio: 1
         }
       },
       {
@@ -71,6 +71,7 @@ const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
           stock: 1,
           peso: 1,
           sabor: 1,
+          precio: 1,
           categoria: '$categoria.descripcion'
         }
       }
