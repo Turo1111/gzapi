@@ -17,8 +17,7 @@ const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
     [
       {
         $match: {
-          idBuy: id,
-          estado: true
+          idBuy: id
         }
       },
       {
