@@ -6,7 +6,7 @@ import { Types } from 'mongoose'
 import { getBuy, getBuys, getBuysLimit, insertBuy, qtyBuy } from '../services/buy'
 import { getItemBuy, insertItemBuy } from '../services/itemBuy'
 import { updateProduct } from '../services/product'
-import { ExtendItemBuy } from '../../../gestion-web-gz/src/interfaces/buy.interface';
+import { ItemBuy } from '../interfaces/buy.interface'
 
 interface RequestExt extends Request {
   user?: string | JwtPayload | undefined | any
@@ -16,10 +16,10 @@ const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void
   try {
     const response = await insertBuy({ ...body, user: new Types.ObjectId(user.id) })
     await Promise.all(
-      body.itemsBuy.map(async (item: ExtendItemBuy) => await insertItemBuy({ idProducto: new Types.ObjectId(item.idProducto), total: item.total, cantidad: item.cantidad, precio: item.precio, idBuy: response._id as Types.ObjectId, estado: true  }))
+      body.itemsBuy.map(async (item: ItemBuy) => await insertItemBuy({ idProducto: new Types.ObjectId(item.idProducto), total: item.total, cantidad: item.cantidad, precio: item.precio, idBuy: response._id as Types.ObjectId, estado: true  }))
     )
     await Promise.all(
-      body.itemsBuy.map(async (item: ExtendItemBuy) => await updateProduct(new Types.ObjectId(item.idProducto), {precioCompra: item.precio}))
+      body.itemsBuy.map(async (item: ItemBuy) => await updateProduct(new Types.ObjectId(item.idProducto), {precioCompra: item.precio}))
     )
     emitSocket('buy', {
       action: 'create',
