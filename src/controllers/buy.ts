@@ -3,8 +3,8 @@ import { emitSocket } from '../socket'
 import { handleHttp } from '../utils/error.handle'
 import { JwtPayload } from 'jsonwebtoken'
 import { Types } from 'mongoose'
-import { getBuy, getBuys, getBuysLimit, insertBuy, qtyBuy } from '../services/buy'
-import { getItemBuy, insertItemBuy } from '../services/itemBuy'
+import { getBuy, getBuys, getBuysLimit, insertBuy, qtyBuy, updateBuy } from '../services/buy'
+import { getItemBuy, insertItemBuy, updateItemsBuy } from '../services/itemBuy'
 import { updateProduct } from '../services/product'
 import { ItemBuy } from '../interfaces/buy.interface'
 
@@ -16,10 +16,10 @@ const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void
   try {
     const response = await insertBuy({ ...body, user: new Types.ObjectId(user.id) })
     await Promise.all(
-      body.itemsBuy.map(async (item: ItemBuy) => await insertItemBuy({ idProducto: new Types.ObjectId(item.idProducto), total: item.total, cantidad: item.cantidad, precio: item.precio, idBuy: response._id as Types.ObjectId, estado: true  }))
+      body.itemsBuy.map(async (item: ItemBuy) => await insertItemBuy({ idProducto: new Types.ObjectId(item.idProducto), total: item.total, cantidad: item.cantidad, precio: item.precio, idBuy: response._id as Types.ObjectId, estado: true }))
     )
     await Promise.all(
-      body.itemsBuy.map(async (item: ItemBuy) => await updateProduct(new Types.ObjectId(item.idProducto), {precioCompra: item.precio}))
+      body.itemsBuy.map(async (item: ItemBuy) => await updateProduct(new Types.ObjectId(item.idProducto), { precioCompra: item.precio }))
     )
     emitSocket('buy', {
       action: 'create',
@@ -58,4 +58,39 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
   }
 }
 
-export { postItem, getItem, getItems }
+const updateItem = async ({ params, body, user }: RequestExt, res: Response): Promise<void> => {
+  try {
+    const { id } = params
+    console.log(body)
+    const response = await updateBuy(new Types.ObjectId(id), { ...body, user: new Types.ObjectId(user.id) })
+    await Promise.all(
+      body.itemsBuy.map(async (item: any) => {
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+        if (item.idBuy) {
+          await updateItemsBuy(new Types.ObjectId(item._id), { ...item })
+        } else {
+          await insertItemBuy({ idProducto: item.idProducto, total: item.total, cantidad: item.cantidad, idBuy: new Types.ObjectId(id), estado: true, precio: item.precio })
+        }
+      })
+    )
+    emitSocket('buy', {
+      action: 'update',
+      data: response
+    })
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_PATCH_ITEM', e)
+  }
+}
+
+const patchItemBuy = async ({ params, body }: RequestExt, res: Response): Promise<void> => {
+  try {
+    const { id } = params
+    const response = await updateItemsBuy(new Types.ObjectId(id), body)
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_DELETE_ITEM')
+  }
+}
+
+export { postItem, getItem, getItems, updateItem, patchItemBuy }

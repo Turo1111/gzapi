@@ -17,7 +17,11 @@ const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
     [
       {
         $match: {
-          idBuy: id
+          idBuy: id,
+          $or: [
+            { estado: true },
+            { estado: { $exists: false } }
+          ]
         }
       },
       {
@@ -33,7 +37,7 @@ const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
       },
       {
         $project: {
-          idVenta: 1,
+          idBuy: 1,
           idProducto: 1,
           cantidad: 1,
           total: 1,
@@ -60,7 +64,7 @@ const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
       {
         $project: {
           estado: 1,
-          idVenta: 1,
+          idBuy: 1,
           idProducto: 1,
           cantidad: 1,
           total: 1,
@@ -78,4 +82,9 @@ const getItemBuy = async (id: Types.ObjectId): Promise<any> => {
   )
 }
 
-export { insertItemBuy, getItemBuys, getItemBuy }
+const updateItemsBuy = async (id: Types.ObjectId, item: Partial<ItemBuy>): Promise<any> => {
+  const response = await ItemBuyModel.updateOne({ _id: id }, { $set: item })
+  return response
+}
+
+export { insertItemBuy, getItemBuys, getItemBuy, updateItemsBuy }

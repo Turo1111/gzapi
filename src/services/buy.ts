@@ -12,7 +12,7 @@ const getBuys = async (input: string): Promise<Buy[]> => {
   }
 
   if (input !== '') {
-    query.cliente = {
+    query.proveedor = {
       $regex: input,
       $options: 'i'
     }
@@ -40,4 +40,9 @@ const qtyBuy = async (): Promise<any> => {
   return response
 }
 
-export { insertBuy, getBuys, getBuy, getBuysLimit, qtyBuy }
+const updateBuy = async (id: Types.ObjectId, sale: Buy): Promise<any> => {
+  const response = await BuyModel.updateOne({ _id: id }, { $set: sale })
+  return response
+}
+
+export { insertBuy, getBuys, getBuy, getBuysLimit, qtyBuy, updateBuy }

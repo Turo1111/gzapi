@@ -18,7 +18,10 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
       {
         $match: {
           idVenta: id,
-          estado: true
+          $or: [
+            { estado: true },
+            { estado: { $exists: false } }
+          ]
         }
       },
       {
