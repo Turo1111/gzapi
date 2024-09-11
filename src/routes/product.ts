@@ -6,7 +6,7 @@ import { deleteItem, getAllItems, getImage, getItem, getItems, postItem, uptdate
 const router = Router()
 
 router.get('/:id', checkJwt, getItem)
-router.get('/', checkJwt, getAllItems)
+router.get('/', getAllItems)
 router.post('/skip', getItems)
 router.post('/search', getItems)
 router.post('/', checkJwt, postItem)
