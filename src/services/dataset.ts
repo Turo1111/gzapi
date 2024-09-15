@@ -197,20 +197,21 @@ const getAnnuallyData = async (): Promise<Response[]> => {
 };
 
 const getDailyDataGraph = async (): Promise<any> => {
-  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']; 
+  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']; 
   const today = new Date();
-  const todayIndex = today.getDay(); // Obtiene el índice del día de la semana (0 para Domingo, 1 para Lunes, etc.)
+  const todayIndex = (today.getDay() + 6) % 7; // Ajuste para que el lunes sea el día 0, martes el día 1, y así sucesivamente.
 
   let sales = [];
   let buy = [];
 
-
   for (let i = 0; i < 7; i++) {
-    const dayIndex = (todayIndex - todayIndex + i + 7) % 7; // Calcula el índice del día de la semana correspondiente
+    const dayIndex = (todayIndex - todayIndex + i + 7) % 7; // Mantener el cálculo del índice
     const dayOfWeek = addDays(today, i - todayIndex); // Calcula la fecha correspondiente al día de la semana
     
     const start = startOfDay(dayOfWeek);
     const end = endOfDay(dayOfWeek);
+
+    console.log(dayIndex, dayOfWeek, start, end)
 
     const responseSale = await SaleModel.aggregate([
       { $match: { createdAt: { $gte: start, $lte: end } } },
@@ -224,14 +225,14 @@ const getDailyDataGraph = async (): Promise<any> => {
 
     sales.push({
       id: i,
-      label: days[dayIndex], // Asignación correcta del día
+      label: days[dayIndex], // Asignación correcta del día de la semana
       totalSales: responseSale[0]?.totalSales || 0,
       salesCount: responseSale[0]?.salesCount || 0,
     });
 
     buy.push({
       id: i,
-      label: days[dayIndex], // Asignación correcta del día
+      label: days[dayIndex], // Asignación correcta del día de la semana
       totalSales: responseBuy[0]?.totalSales || 0,
       salesCount: responseBuy[0]?.salesCount || 0,
     }); 
@@ -239,6 +240,7 @@ const getDailyDataGraph = async (): Promise<any> => {
 
   return { sales, buy };
 };
+
 
 const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[] }> => {
   const today = new Date();
@@ -248,8 +250,8 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
   let buy = [];
 
   for (let i = 0; i < 4; i++) { // Intentando obtener datos de las últimas 4 semanas
-    const start = startOfWeek(addWeeks(today, -i));
-    const end = endOfWeek(addWeeks(today, -i));
+    const start = startOfWeek(addWeeks(today, -i), { weekStartsOn: 1 });
+    const end = endOfWeek(addWeeks(today, -i), { weekStartsOn: 1 });
 
     // Verificar si la semana pertenece al mismo mes
     if (start.getMonth() !== currentMonth) {
