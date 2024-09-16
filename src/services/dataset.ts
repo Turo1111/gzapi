@@ -1,6 +1,6 @@
 import BuyModel from "../models/buy";
 import SaleModel from "../models/sale";
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, addDays, addWeeks, addMonths, addYears } from 'date-fns';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, addDays, addWeeks, addMonths, addYears, addHours } from 'date-fns';
 
 interface Response {
   totalSales: number;
@@ -208,8 +208,8 @@ const getDailyDataGraph = async (): Promise<any> => {
     const dayIndex = (todayIndex - todayIndex + i + 7) % 7; // Mantener el cálculo del índice
     const dayOfWeek = addDays(today, i - todayIndex); // Calcula la fecha correspondiente al día de la semana
     
-    const start = startOfDay(dayOfWeek);
-    const end = endOfDay(dayOfWeek);
+    const start = addHours(startOfDay(dayOfWeek), 3);
+    const end = addHours(endOfDay(dayOfWeek), 3);
 
     console.log(dayIndex, dayOfWeek, start, end)
 
