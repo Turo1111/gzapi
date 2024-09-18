@@ -10,6 +10,7 @@ interface Response {
 
 const getDailyData = async (): Promise<Response[]> => {
   const today = new Date()
+  today.setHours(today.getHours() - 3)
   const start = addHours(startOfDay(today), 3)
   const end = addHours(endOfDay(today), 3)
 
@@ -59,6 +60,7 @@ const getDailyData = async (): Promise<Response[]> => {
 
 const getWeeklyData = async (): Promise<Response[]> => {
   const today = new Date()
+  today.setHours(today.getHours() - 3)
   const start = addHours(startOfWeek(today), 3)
   const end = addHours(endOfWeek(today), 3)
 
@@ -106,6 +108,7 @@ const getWeeklyData = async (): Promise<Response[]> => {
 
 const getMonthlyData = async (): Promise<Response[]> => {
   const today = new Date()
+  today.setHours(today.getHours() - 3)
   const start = addHours(startOfMonth(today), 3)
   const end = addHours(endOfMonth(today), 3)
 
@@ -153,6 +156,7 @@ const getMonthlyData = async (): Promise<Response[]> => {
 
 const getAnnuallyData = async (): Promise<Response[]> => {
   const today = new Date()
+  today.setHours(today.getHours() - 3)
   const start = addHours(startOfYear(today), 3)
   const end = addHours(endOfYear(today), 3)
 
@@ -201,6 +205,7 @@ const getAnnuallyData = async (): Promise<Response[]> => {
 const getDailyDataGraph = async (): Promise<any> => {
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
   const today = new Date()
+  today.setHours(today.getHours() - 3)
   const todayIndex = (today.getDay() + 6) % 7 // Ajuste para que el lunes sea el día 0, martes el día 1, y así sucesivamente.
 
   const sales = []
@@ -245,6 +250,7 @@ const getDailyDataGraph = async (): Promise<any> => {
 
 const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[] }> => {
   const today = new Date()
+  today.setHours(today.getHours() - 3)
   const currentMonth = today.getMonth() // Mes actual (0 para enero, 11 para diciembre)
 
   const sales = []
@@ -290,6 +296,7 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
 const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response[] }> => {
   const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
   const today = new Date()
+  today.setHours(today.getHours() - 3)
   const currentYear = today.getFullYear() // Año actual
 
   const sales = []
@@ -347,7 +354,7 @@ const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response
 
 const getAnnuallyDataGraph = async (): Promise<{ sales: Response[], buy: Response[] }> => {
   const today = new Date()
-
+  today.setHours(today.getHours() - 3)
   const sales = []
   const buy = []
 
