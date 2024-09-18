@@ -20,7 +20,11 @@ const getSales = async (input: string): Promise<Sale[]> => {
 
   const response = await SaleModel.aggregate([{
     $match: query
-  }])
+  },
+  {
+    $sort: { createdAt: -1 } 
+  }
+  ])
 
   return response
 }

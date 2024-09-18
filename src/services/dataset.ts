@@ -10,8 +10,8 @@ interface Response {
 
 const getDailyData = async (): Promise<Response[]> => {
   const today = new Date();
-  const start = startOfDay(today);
-  const end = endOfDay(today);
+  const start = addHours(startOfDay(today), 3);
+  const end = addHours(endOfDay(today), 3);
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -57,8 +57,8 @@ const getDailyData = async (): Promise<Response[]> => {
 
 const getWeeklyData = async (): Promise<Response[]> => {
   const today = new Date();
-  const start = startOfWeek(today);
-  const end = endOfWeek(today);
+  const start = addHours(startOfWeek(today), 3);
+  const end = addHours(endOfWeek(today), 3);
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -104,8 +104,8 @@ const getWeeklyData = async (): Promise<Response[]> => {
 
 const getMonthlyData = async (): Promise<Response[]> => {
   const today = new Date();
-  const start = startOfMonth(today);
-  const end = endOfMonth(today);
+  const start = addHours(startOfMonth(today), 3);
+  const end = addHours(endOfMonth(today), 3)
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -151,8 +151,8 @@ const getMonthlyData = async (): Promise<Response[]> => {
 
 const getAnnuallyData = async (): Promise<Response[]> => {
   const today = new Date();
-  const start = startOfYear(today);
-  const end = endOfYear(today);
+  const start = addHours(startOfYear(today), 3);
+  const end = addHours(endOfYear(today), 3);
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -250,8 +250,8 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
   let buy = [];
 
   for (let i = 0; i < 4; i++) { // Intentando obtener datos de las últimas 4 semanas
-    const start = startOfWeek(addWeeks(today, -i), { weekStartsOn: 1 });
-    const end = endOfWeek(addWeeks(today, -i), { weekStartsOn: 1 });
+    const start = addHours(startOfWeek(addWeeks(today, -i), { weekStartsOn: 1 }), 3);
+    const end = addHours(endOfWeek(addWeeks(today, -i), { weekStartsOn: 1 }), 3);
 
     // Verificar si la semana pertenece al mismo mes
     if (start.getMonth() !== currentMonth) {
@@ -295,8 +295,8 @@ const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response
   let buy = [];
 
   for (let i = 0; i < 12; i++) { // Intentando obtener datos de los últimos 12 meses
-    const start = startOfMonth(addMonths(today, -i));
-    const end = endOfMonth(addMonths(today, -i));
+    const start = addHours(startOfMonth(addMonths(today, -i)), 3);
+    const end = addHours(endOfMonth(addMonths(today, -i)), 3);
 
     // Verificar si el mes pertenece al mismo año
     if (start.getFullYear() !== currentYear) {
@@ -351,8 +351,8 @@ const getAnnuallyDataGraph = async (): Promise<{ sales: Response[], buy: Respons
   let buy = [];
 
   for (let i = 0; i < 5; i++) { // Obteniendo datos de los últimos 5 años
-    const start = startOfYear(addYears(today, -i));
-    const end = endOfYear(addYears(today, -i));
+    const start = addHours(startOfYear(addYears(today, -i)), 3);
+    const end = addHours(endOfYear(addYears(today, -i)), 3);
 
     const responseSale = await SaleModel.aggregate([
       { $match: { createdAt: { $gte: start, $lte: end } } },
