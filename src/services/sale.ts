@@ -22,7 +22,7 @@ const getSales = async (input: string): Promise<Sale[]> => {
     $match: query
   },
   {
-    $sort: { createdAt: -1 } 
+    $sort: { createdAt: -1 }
   }
   ])
 
@@ -30,7 +30,7 @@ const getSales = async (input: string): Promise<Sale[]> => {
 }
 
 const getSalesLimit = async (skip: number, limit: number): Promise<Sale[]> => {
-  const response = await SaleModel.find({}).skip(skip).limit(limit)
+  const response = await SaleModel.find({}).skip(skip).limit(limit).sort({ createdAt: -1 })
   return response
 }
 
