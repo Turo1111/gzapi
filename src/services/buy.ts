@@ -20,13 +20,17 @@ const getBuys = async (input: string): Promise<Buy[]> => {
 
   const response = await BuyModel.aggregate([{
     $match: query
-  }])
+  },
+  {
+    $sort: { createdAt: -1 }
+  }
+  ])
 
   return response
 }
 
 const getBuysLimit = async (skip: number, limit: number): Promise<Buy[]> => {
-  const response = await BuyModel.find({}).skip(skip).limit(limit)
+  const response = await BuyModel.find({}).skip(skip).limit(limit).sort({ createdAt: -1 })
   return response
 }
 
