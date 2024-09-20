@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { checkJwt } from '../middleware/session'
-import { deleteItem, getAllItems, getImage, getItem, getItems, postItem, uptdateItem, uptdateItems } from '../controllers/product'
+import { deleteItem, getAllItems, getImage, getItem, getItems, getNothing, postItem, uptdateItem, uptdateItems } from '../controllers/product'
 /* import multerMiddleware, { compressImage } from '../middleware/file' */
 
 const router = Router()
@@ -12,6 +12,7 @@ router.post('/search', getItems)
 router.post('/', checkJwt, postItem)
 /* router.post('/uploadImage', multerMiddleware.single('myfile'), compressImage, uploadImage) */
 router.get('/image/:image', getImage)
+router.get('/active', getNothing)
 router.patch('/:id', checkJwt, uptdateItem)
 router.patch('/', checkJwt, uptdateItems)
 router.delete('/:id', checkJwt, deleteItem)

@@ -11,6 +11,14 @@ interface RequestExt extends Request {
   user?: string | JwtPayload | undefined | any
 }
 
+const getNothing = async (_: RequestExt, res: Response): Promise<void> => {
+  try {
+    res.send('')
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_ITEM')
+  }
+}
+
 const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => {
   try {
     const { id } = params
@@ -20,6 +28,7 @@ const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => 
     handleHttp(res, 'ERROR_GET_ITEM')
   }
 }
+
 const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
   try {
     const { input, skip, limit } = body
@@ -166,4 +175,4 @@ const getAllItems = async (_: RequestExt, res: Response): Promise<void> => {
   }
 }
 
-export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage, getAllItems }
+export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage, getAllItems, getNothing }

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { checkJwt } from '../middleware/session'
-import { getItem, getItems, postItem, updateItem } from '../controllers/sale'
+import { getItem, getItems, postItem, postMultipleItem, updateItem } from '../controllers/sale'
 
 const router = Router()
 
@@ -9,6 +9,7 @@ router.post('/skip', getItems)
 router.post('/search', getItems)
 router.get('/:id', checkJwt, getItem)
 router.post('/', checkJwt, postItem)
+router.post('/multiple', checkJwt, postMultipleItem)
 router.patch('/:id', checkJwt, updateItem)
 
 export { router }

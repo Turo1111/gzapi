@@ -27,8 +27,45 @@ const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void
   }
 }
 
+const postMultipleItem = async ({ body, user }: RequestExt, res: Response): Promise<void> => {
+  try {
+    console.log(user)
+    /* const response = await insertSale({ ...body, user: new Types.ObjectId(user.id) }) */
+    await Promise.all(
+      body.map(async (item: any) => {
+        console.log({ ...item, user: new Types.ObjectId(user.id) })
+
+        // Ejecutar insertSale y esperar a que termine antes de continuar con insertItemSale
+        const response = await insertSale({ ...item, user: new Types.ObjectId(user.id) })
+
+        // Anidar Promise.all para itemsSale
+        await Promise.all(
+          item.itemsSale.map(async (item: any) =>
+            await insertItemSale({
+              idProducto: item._id,
+              total: item.total,
+              cantidad: item.cantidad,
+              idVenta: response._id,
+              estado: true
+            })
+          )
+        )
+      })
+    )
+    /*   */
+    emitSocket('sale', {
+      action: 'create',
+      data: 'Ventas guardadas'
+    })
+    res.send('Ventas guardadas')
+  } catch (e) {
+    handleHttp(res, 'ERROR_POST_ITEM', e)
+  }
+}
+
 const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => {
   try {
+    console.log('aca')
     const { id } = params
     const response = await getSale(new Types.ObjectId(id))
     const response2 = await getItemSale(new Types.ObjectId(id))
@@ -80,4 +117,4 @@ const updateItem = async ({ params, body, user }: RequestExt, res: Response): Pr
   }
 }
 
-export { postItem, getItem, getItems, updateItem }
+export { postItem, getItem, getItems, updateItem, postMultipleItem }
