@@ -18,6 +18,9 @@ const SaleSchema = new Schema<Sale>(
     },
     cliente: {
       type: String
+    },
+    porcentaje: {
+      type: Number
     }
   },
   {

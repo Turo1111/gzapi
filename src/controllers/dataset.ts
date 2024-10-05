@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { handleHttp } from '../utils/error.handle'
-import { getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph } from '../services/dataset'
+import { getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph, bestSelling, highProfit, dataProduct } from '../services/dataset'
 
 const dailyCtrl = async (_: Request, res: Response): Promise<void> => {
   try {
@@ -43,4 +43,31 @@ const annuallyCtrl = async (_: Request, res: Response): Promise<void> => {
   }
 }
 
-export { dailyCtrl, weeklyCtrl, monthlyCtrl, annuallyCtrl }
+const bestSellingCtrl = async (_: Request, res: Response): Promise<void> => {
+  try {
+    const response = await bestSelling()
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_BEST_SELLING')
+  }
+}
+
+const highProfitCtrl = async (_: Request, res: Response): Promise<void> => {
+  try {
+    const response = await highProfit()
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_BEST_SELLING')
+  }
+}
+
+const dataProductCtrl = async (_: Request, res: Response): Promise<void> => {
+  try {
+    const response = await dataProduct()
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_BEST_SELLING')
+  }
+}
+
+export { dailyCtrl, weeklyCtrl, monthlyCtrl, annuallyCtrl, bestSellingCtrl, highProfitCtrl, dataProductCtrl }

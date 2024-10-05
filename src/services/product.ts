@@ -72,11 +72,94 @@ const getAllProducts = async (): Promise<Product[]> => {
         $unwind: '$NameCategoria'
       },
       {
-        $sort: { descripcion: 1 } 
+        $sort: { descripcion: 1 }
       }
     ]
   )
 }
+
+const getAllProductsCategories = async (): Promise<any[]> => {
+  return await ProductModel.aggregate([
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'categoria',
+        foreignField: '_id',
+        as: 'categoria'
+      }
+    },
+    {
+      $lookup: {
+        from: 'brands',
+        localField: 'marca',
+        foreignField: '_id',
+        as: 'marca'
+      }
+    },
+    {
+      $lookup: {
+        from: 'providers',
+        localField: 'proveedor',
+        foreignField: '_id',
+        as: 'proveedor'
+      }
+    },
+    {
+      $unwind: '$categoria'
+    },
+    {
+      $unwind: '$proveedor'
+    },
+    {
+      $unwind: '$marca'
+    },
+    {
+      $project: {
+        _id: 0, // Excluimos el _id
+        descripcion: 1,
+        stock: 1,
+        codigoBarra: 1,
+        peso: 1,
+        sabor: 1,
+        bulto: 1,
+        precioBulto: 1,
+        precioCompra: 1,
+        precioUnitario: 1,
+        categoria: '$categoria.descripcion', // Obtenemos el nombre de la categoría
+        proveedor: '$proveedor.descripcion', // Obtenemos el nombre del proveedor
+        marca: '$marca.descripcion' // Obtenemos el nombre de la marca
+      }
+    },
+    {
+      $group: {
+        _id: '$categoria', // Agrupamos por el nombre de la categoría
+        productos: {
+          $push: {
+            descripcion: '$descripcion',
+            stock: '$stock',
+            codigoBarra: '$codigoBarra',
+            peso: '$peso',
+            sabor: '$sabor',
+            bulto: '$bulto',
+            precioBulto: '$precioBulto',
+            precioCompra: '$precioCompra',
+            precioUnitario: '$precioUnitario',
+            proveedor: '$proveedor', // Nombre del proveedor
+            marca: '$marca' // Nombre de la marca
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 0, // Excluimos el _id
+        categoria: '$_id', // Mantenemos el nombre de la categoría
+        productos: 1 // Mantenemos la lista de productos
+      }
+    }
+  ]);
+};
+
 
 const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
   return await ProductModel.aggregate(
@@ -111,7 +194,7 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
           stock: 1,
           codigoBarra: 1,
           peso: 1,
-          sabor: 1,
+          /* sabor: 1, */
           bulto: 1,
           precioBulto: 1,
           precioCompra: 1,
@@ -122,7 +205,8 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
           NameProveedor: '$proveedor.descripcion',
           NameMarca: '$marca.descripcion',
           NameCategoria: '$categoria.descripcion',
-          createdAt: 1
+          createdAt: 1,
+          descripcionLower: { $toLower: '$descripcion' }
         }
       },
       {
@@ -144,7 +228,7 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
         $unwind: '$NameCategoria'
       },
       {
-        $sort: { descripcion: 1 } 
+        $sort: { descripcionLower: 1 }
       }
     ]
   ).skip(skip).limit(limit)
@@ -228,7 +312,7 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
         $match: query
       },
       {
-        $sort: { descripcion: 1 } 
+        $sort: { descripcion: 1 }
       }
     ]
   )
@@ -279,6 +363,7 @@ const getProduct = async (id: Types.ObjectId): Promise<any> => {
           precioBulto: 1,
           precioCompra: 1,
           precioUnitario: 1,
+          porcentaje: 1,
           categoria: '$categoria._id',
           proveedor: '$proveedor._id',
           marca: '$marca._id',
@@ -345,4 +430,4 @@ const findProducts = async (filter: Filter): Promise<any> => {
   return response
 }
 
-export { getProduct, getProducts, insertProduct, updateProduct, getProductsSearch, findProducts, qtyProduct, getAllProducts }
+export { getProduct, getProducts, insertProduct, updateProduct, getProductsSearch, findProducts, qtyProduct, getAllProducts, getAllProductsCategories }

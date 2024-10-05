@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { checkJwt } from '../middleware/session'
-import { deleteItem, getAllItems, getImage, getItem, getItems, getNothing, postItem, uptdateItem, uptdateItems } from '../controllers/product'
+import { deleteItem, getAllItems, getImage, getItem, getItems, getNothing, postItem, printList, uptdateItem, uptdateItems } from '../controllers/product'
 /* import multerMiddleware, { compressImage } from '../middleware/file' */
 
 const router = Router()
@@ -16,5 +16,6 @@ router.get('/active', getNothing)
 router.patch('/:id', checkJwt, uptdateItem)
 router.patch('/', checkJwt, uptdateItems)
 router.delete('/:id', checkJwt, deleteItem)
+router.get('/print/print', checkJwt, printList)
 
 export { router }

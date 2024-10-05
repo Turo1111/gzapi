@@ -1,4 +1,5 @@
 import BuyModel from '../models/buy'
+import ItemSaleModel from '../models/itemSale'
 import SaleModel from '../models/sale'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, addDays, addWeeks, addMonths, addYears, addHours } from 'date-fns'
 
@@ -394,4 +395,156 @@ const getAnnuallyDataGraph = async (): Promise<{ sales: Response[], buy: Respons
   return { sales, buy }
 }
 
-export { getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph }
+const bestSelling = async (): Promise<any[]> => {
+  const productosMasVendidos = await ItemSaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date('2024-09-01T00:00:00.000Z'), // Inicio de septiembre
+          $lt: new Date('2024-10-01T00:00:00.000Z') // Inicio de octubre
+        },
+        estado: true
+      }
+    },
+    {
+      $group: {
+        _id: '$idProducto', // Agrupamos por idProducto
+        totalCantidad: { $sum: '$cantidad' } // Sumar el total de cantidad
+      }
+    },
+    {
+      $lookup: {
+        from: 'products', // Unimos con la colección de productos
+        localField: '_id', // idProducto en ItemSale
+        foreignField: '_id', // _id del producto en Product
+        as: 'productoInfo' // Información del producto se almacena en productoInfo
+      }
+    },
+    {
+      $unwind: '$productoInfo' // Descomponemos el array de productoInfo
+    },
+    {
+      $project: {
+        _id: 0, // Excluimos el _id de la respuesta
+        producto: '$productoInfo.descripcion', // Nombre del producto
+        totalCantidad: 1 // Mantenemos totalCantidad
+      }
+    },
+    {
+      $sort: {
+        totalCantidad: -1 // Ordenamos por la cantidad más alta primero
+      }
+    }
+  ])
+
+  return productosMasVendidos
+}
+
+const highProfit = async (): Promise<any[]> => {
+  const productosQueGeneranMasDinero = await ItemSaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date('2024-09-01T00:00:00.000Z'), // Inicio de septiembre
+          $lt: new Date('2024-10-01T00:00:00.000Z') // Inicio de octubre
+        },
+        estado: true
+      }
+    },
+    {
+      $group: {
+        _id: '$idProducto', // Agrupamos por idProducto
+        totalGenerado: { $sum: '$total' } // Sumar el total generado en dinero
+      }
+    },
+    {
+      $lookup: {
+        from: 'products', // Unimos con la colección de productos
+        localField: '_id', // idProducto en ItemSale
+        foreignField: '_id', // _id del producto en Product
+        as: 'productoInfo' // Información del producto se almacena en productoInfo
+      }
+    },
+    {
+      $unwind: '$productoInfo' // Descomponemos el array de productoInfo
+    },
+    {
+      $project: {
+        _id: 0, // Excluimos el _id de la respuesta
+        producto: '$productoInfo.descripcion', // Nombre del producto
+        totalGenerado: 1 // Mantenemos totalGenerado
+      }
+    },
+    {
+      $sort: {
+        totalGenerado: -1 // Ordenamos por el total generado más alto primero
+      }
+    }
+  ])
+
+  return productosQueGeneranMasDinero
+}
+
+const dataProduct = async (): Promise<any[]> => {
+  const productosConMasGanancia = await ItemSaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date('2024-09-01T00:00:00.000Z'), // Inicio de septiembre
+          $lt: new Date('2024-10-01T00:00:00.000Z') // Inicio de octubre
+        },
+        estado: true
+      }
+    },
+    {
+      $group: {
+        _id: '$idProducto', // Agrupamos por idProducto
+        totalVentas: { $sum: '$total' }, // Sumamos el total generado
+        totalCantidad: { $sum: '$cantidad' } // Sumamos la cantidad vendida
+      }
+    },
+    {
+      $lookup: {
+        from: 'products', // Unimos con la colección de productos
+        localField: '_id', // idProducto en ItemSale
+        foreignField: '_id', // _id del producto en Product
+        as: 'productoInfo' // Información del producto en productoInfo
+      }
+    },
+    {
+      $unwind: '$productoInfo' // Descomponemos el array de productoInfo
+    },
+    {
+      $addFields: {
+        ganancia: {
+          $subtract: [
+            '$totalVentas',
+            { $multiply: ['$totalCantidad', '$productoInfo.precioCompra'] } // Fórmula de ganancia
+          ]
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 1, // Excluimos el _id de la respuesta
+        /* idProducto: 1, */
+        producto: '$productoInfo.descripcion', // Nombre del producto
+        totalVentas: 1, // Mantenemos totalVentas
+        totalCantidad: 1, // Mantenemos totalCantidad
+        ganancia: 1 // Mantenemos la ganancia
+      }
+    },
+    {
+      $sort: {
+        ganancia: -1 // Ordenamos por mayor ganancia primero
+      }
+    }
+  ])
+
+  return productosConMasGanancia
+}
+
+export {
+  getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph,
+  bestSelling, highProfit, dataProduct
+}

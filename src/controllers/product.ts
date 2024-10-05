@@ -3,9 +3,11 @@ import { handleHttp } from '../utils/error.handle'
 import { Types } from 'mongoose'
 import { JwtPayload } from 'jsonwebtoken'
 import { emitSocket } from '../socket'
-import { findProducts, getAllProducts, getProduct, getProducts, getProductsSearch, insertProduct, qtyProduct, updateProduct } from '../services/product'
+import { findProducts, getAllProducts, getAllProductsCategories, getProduct, getProducts, getProductsSearch, insertProduct, qtyProduct, updateProduct } from '../services/product'
 import { Product } from '../interfaces/product.interface'
 import { ObjectId } from 'mongodb'
+import PDFDocument from 'pdfkit'
+import path from 'path'
 
 interface RequestExt extends Request {
   user?: string | JwtPayload | undefined | any
@@ -175,4 +177,47 @@ const getAllItems = async (_: RequestExt, res: Response): Promise<void> => {
   }
 }
 
-export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage, getAllItems, getNothing }
+const printList = async (_: RequestExt, res: Response): Promise<void> => {
+  try {
+    const products = await getAllProductsCategories()
+    if (products.length === 0) {
+      res.status(404).send('Products not found')
+      return
+    }
+    const doc = new PDFDocument()
+    res.setHeader('Content-disposition', 'attachment; filename=ListaDePrecios.pdf')
+    res.setHeader('Content-type', 'application/pdf')
+    doc.pipe(res)
+    const logoPath = path.join(__dirname, '../../public/image/LOGO.png')
+    doc.image(logoPath, 450, 5, { width: 100 })
+    let yPosition = 0
+    // Iterar sobre cada categoría
+    products.forEach((item: { categoria: string, productos: [] }) => {
+      doc.fontSize(18).font('Helvetica-Bold').fillColor('#3764A0')
+        .text(`${item.categoria}`, 25, yPosition + 25)
+      yPosition += 25
+      item.productos.forEach((itemProduct: Product) => {
+        doc.fontSize(14).font('Helvetica').fillColor('black').text(`${itemProduct.descripcion}`, 50, yPosition + 25)
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50').text(`$ ${itemProduct.precioUnitario}`, 450, yPosition + 25)
+        yPosition += 25
+        if (yPosition === 700) {
+          doc.addPage()
+          yPosition = 25
+          doc.image(logoPath, 450, 5, { width: 100 })
+        }
+      })
+      if (yPosition === 700) {
+        doc.addPage()
+        yPosition = 25
+        doc.image(logoPath, 450, 5, { width: 100 })
+      }
+    })
+
+    // Finalizar el documento
+    doc.end()
+  } catch (e) {
+    handleHttp(res, 'ERROR_PRINT_LIST')
+  }
+}
+
+export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage, getAllItems, getNothing, printList }

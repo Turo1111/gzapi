@@ -5,15 +5,19 @@ export interface Sale {
   estado: string
   user: ObjectId
   cliente: string
-  total: Number
+  total: number
+  createdAt: string
   itemsSale: ItemSale[]
+  porcentaje?: number
 }
 
 export interface ItemSale {
   _id?: Types.ObjectId
   idVenta: Types.ObjectId
   idProducto: Types.ObjectId
-  cantidad: Number
-  total: Number
+  cantidad: number
+  total: number
   estado: boolean
+  descripcion?: string
+  precioUnitario?: number
 }
