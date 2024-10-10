@@ -78,7 +78,19 @@ const getAllProducts = async (): Promise<Product[]> => {
   )
 }
 
-const getAllProductsCategories = async (): Promise<any[]> => {
+const getAllProductsCategories = async (categories: [] | undefined): Promise<any[]> => {
+  let query: any = {
+
+  }
+
+  if (categories !== undefined) {
+    if (categories?.length !== 0) {
+      query = { categoria: { $in: categories } }
+    }
+  } else {
+    query = {}
+  }
+
   return await ProductModel.aggregate([
     {
       $lookup: {
@@ -125,10 +137,16 @@ const getAllProductsCategories = async (): Promise<any[]> => {
         precioBulto: 1,
         precioCompra: 1,
         precioUnitario: 1,
-        categoria: '$categoria.descripcion', // Obtenemos el nombre de la categoría
-        proveedor: '$proveedor.descripcion', // Obtenemos el nombre del proveedor
-        marca: '$marca.descripcion' // Obtenemos el nombre de la marca
+        idCategoria: '$categoria._id',
+        idProveedor: '$proveedor._id',
+        idMarca: '$marca._id',
+        categoria: '$categoria.descripcion',
+        proveedor: '$proveedor.descripcion',
+        marca: '$marca.descripcion'
       }
+    },
+    {
+      $match: query
     },
     {
       $group: {
@@ -157,9 +175,8 @@ const getAllProductsCategories = async (): Promise<any[]> => {
         productos: 1 // Mantenemos la lista de productos
       }
     }
-  ]);
-};
-
+  ])
+}
 
 const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
   return await ProductModel.aggregate(
@@ -248,6 +265,8 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
   if (filter.categoria !== undefined || filter.marca !== undefined || filter.proveedor !== undefined) {
     query = Object.assign({}, query, filter)
   }
+
+  console.log(query)
 
   return await ProductModel.aggregate(
     [

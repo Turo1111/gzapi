@@ -177,9 +177,10 @@ const getAllItems = async (_: RequestExt, res: Response): Promise<void> => {
   }
 }
 
-const printList = async (_: RequestExt, res: Response): Promise<void> => {
+const printList = async ({ body }: RequestExt, res: Response): Promise<void> => {
   try {
-    const products = await getAllProductsCategories()
+    const { categories } = body
+    const products = await getAllProductsCategories(categories)
     if (products.length === 0) {
       res.status(404).send('Products not found')
       return

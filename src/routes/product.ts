@@ -16,6 +16,6 @@ router.get('/active', getNothing)
 router.patch('/:id', checkJwt, uptdateItem)
 router.patch('/', checkJwt, uptdateItems)
 router.delete('/:id', checkJwt, deleteItem)
-router.get('/print/print', checkJwt, printList)
+router.post('/print/print', checkJwt, printList)
 
 export { router }
