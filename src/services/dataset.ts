@@ -1,3 +1,4 @@
+
 import BuyModel from '../models/buy'
 import ItemSaleModel from '../models/itemSale'
 import SaleModel from '../models/sale'
@@ -10,12 +11,18 @@ interface Response {
 }
 
 const getDailyData = async (): Promise<Response[]> => {
+  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
   const today = new Date()
   today.setHours(today.getHours() - 3)
   const start = addHours(startOfDay(today), 3)
   const end = addHours(endOfDay(today), 3)
+  const todayIndex = (today.getDay() + 6) % 7
 
-  console.log('daily data', start, end)
+  const day = String(today.getDate()).padStart(2, '0') // Asegura que el día tenga 2 dígitos
+  const month = String(today.getMonth() + 1).padStart(2, '0') // Los meses en JavaScript van de 0 a 11
+  const formattedDate = `${days[todayIndex]} ${day}-${month}`
+
+  console.log('daily data', days[todayIndex])
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -54,16 +61,24 @@ const getDailyData = async (): Promise<Response[]> => {
   ])
 
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0 } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0 },
-    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1 } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1 }
+    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: formattedDate } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: formattedDate },
+    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: formattedDate } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: formattedDate }
   ]
 }
 
 const getWeeklyData = async (): Promise<Response[]> => {
   const today = new Date()
   today.setHours(today.getHours() - 3)
-  const start = addHours(startOfWeek(today), 3)
-  const end = addHours(endOfWeek(today), 3)
+  const start = addHours(startOfWeek(today), 27)
+  const end = addHours(endOfWeek(today), 27)
+
+  const dayStart = String(start.getDate()).padStart(2, '0')
+  const monthStart = String(start.getMonth() + 1).padStart(2, '0')
+
+  const dayEnd = String(end.getDate()).padStart(2, '0')
+  const monthEnd = String(end.getMonth() + 1).padStart(2, '0')
+
+  const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}`
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -102,17 +117,24 @@ const getWeeklyData = async (): Promise<Response[]> => {
   ])
 
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0 } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0 },
-    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1 } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1 }
+    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: interval } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
+    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: interval } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: interval }
   ]
 }
 
 const getMonthlyData = async (): Promise<Response[]> => {
+  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
   const today = new Date()
   today.setHours(today.getHours() - 3)
   const start = addHours(startOfMonth(today), 3)
   const end = addHours(endOfMonth(today), 3)
 
+  const month = String(today.getMonth())
+  const year = String(today.getFullYear())
+  const interval = `${months[parseFloat(month)] + ' del ' + year}`
+
+  console.log(month, months[parseFloat(month)])
+
   const responseSale = await SaleModel.aggregate([
     {
       $match: {
@@ -150,8 +172,8 @@ const getMonthlyData = async (): Promise<Response[]> => {
   ])
 
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0 } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0 },
-    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1 } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1 }
+    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: interval } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
+    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: interval } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: interval }
   ]
 }
 
@@ -161,6 +183,18 @@ const getAnnuallyData = async (): Promise<Response[]> => {
   const start = addHours(startOfYear(today), 3)
   const end = addHours(endOfYear(today), 3)
 
+  const dayStart = String(start.getDate()).padStart(2, '0')
+  const monthStart = String(start.getMonth() + 1).padStart(2, '0')
+
+  const dayEnd = String(end.getDate()).padStart(2, '0')
+  const monthEnd = String(end.getMonth() + 1).padStart(2, '0')
+
+  const year = String(today.getFullYear())
+
+  const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}`
+
+  console.log(interval, year)
+
   const responseSale = await SaleModel.aggregate([
     {
       $match: {
@@ -198,8 +232,68 @@ const getAnnuallyData = async (): Promise<Response[]> => {
   ])
 
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0 } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0 },
-    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1 } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1 }
+    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: year } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: year },
+    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: year } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: year }
+  ]
+}
+
+const getCustomData = async (): Promise<Response[]> => {
+  const today = new Date()
+  today.setHours(today.getHours() - 3)
+  const start = addHours(startOfYear(today), 3)
+  const end = addHours(endOfYear(today), 3)
+
+  const dayStart = String(start.getDate()).padStart(2, '0')
+  const monthStart = String(start.getMonth() + 1).padStart(2, '0')
+
+  const dayEnd = String(end.getDate()).padStart(2, '0')
+  const monthEnd = String(end.getMonth() + 1).padStart(2, '0')
+
+  const year = String(today.getFullYear())
+
+  const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}`
+
+  console.log(interval, year)
+
+  const responseSale = await SaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: start,
+          $lte: end
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$total' },
+        salesCount: { $sum: 1 }
+      }
+    }
+  ])
+
+  const responseBuy = await BuyModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: start,
+          $lte: end
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$total' },
+        salesCount: { $sum: 1 }
+      }
+    }
+  ])
+
+  return [
+    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: year } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: year },
+    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: year } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: year }
   ]
 }
 
@@ -218,8 +312,6 @@ const getDailyDataGraph = async (): Promise<any> => {
 
     const start = addHours(startOfDay(dayOfWeek), 3)
     const end = addHours(endOfDay(dayOfWeek), 3)
-
-    console.log(dayIndex, dayOfWeek, start, end)
 
     const responseSale = await SaleModel.aggregate([
       { $match: { createdAt: { $gte: start, $lte: end } } },
@@ -261,6 +353,14 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
     const start = addHours(startOfWeek(addWeeks(today, -i), { weekStartsOn: 1 }), 3)
     const end = addHours(endOfWeek(addWeeks(today, -i), { weekStartsOn: 1 }), 3)
 
+    const dayStart = String(start.getDate()).padStart(2, '0')
+    const monthStart = String(start.getMonth() + 1).padStart(2, '0')
+
+    const dayEnd = String(end.getDate()).padStart(2, '0')
+    const monthEnd = String(end.getMonth() + 1).padStart(2, '0')
+
+    const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}`
+
     // Verificar si la semana pertenece al mismo mes
     if (start.getMonth() !== currentMonth) {
       break // Detener el ciclo si la semana no pertenece al mes actual
@@ -278,14 +378,14 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
 
     sales.push({
       id: i,
-      label: `Semana ${i + 1}`,
+      label: interval,
       totalSales: responseSale[0]?.totalSales || 0,
       salesCount: responseSale[0]?.salesCount || 0
     })
 
     buy.push({
       id: i,
-      label: `Semana ${i + 1}`,
+      label: interval,
       totalSales: responseBuy[0]?.totalSales || 0,
       salesCount: responseBuy[0]?.salesCount || 0
     })
@@ -546,5 +646,5 @@ const dataProduct = async (): Promise<any[]> => {
 
 export {
   getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph,
-  bestSelling, highProfit, dataProduct
+  bestSelling, highProfit, dataProduct, getCustomData
 }

@@ -43,6 +43,17 @@ const annuallyCtrl = async (_: Request, res: Response): Promise<void> => {
   }
 }
 
+const customCtrl = async (req: Request, res: Response): Promise<void> => {
+  try {
+    console.log(req)
+    const response = await getAnnuallyData()
+    const response2 = await getAnnuallyDataGraph()
+    res.send({ simple: response, graph: response2 })
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_ANNUALLY_DATA')
+  }
+}
+
 const bestSellingCtrl = async (_: Request, res: Response): Promise<void> => {
   try {
     const response = await bestSelling()
@@ -70,4 +81,4 @@ const dataProductCtrl = async (_: Request, res: Response): Promise<void> => {
   }
 }
 
-export { dailyCtrl, weeklyCtrl, monthlyCtrl, annuallyCtrl, bestSellingCtrl, highProfitCtrl, dataProductCtrl }
+export { dailyCtrl, weeklyCtrl, monthlyCtrl, annuallyCtrl, bestSellingCtrl, highProfitCtrl, dataProductCtrl, customCtrl }
