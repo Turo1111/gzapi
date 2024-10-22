@@ -132,6 +132,8 @@ const printSale = async (req: Request, res: Response): Promise<void> => {
 
     const itemsSale: ItemSale[] = await getItemSale(saleId)
 
+    console.log(itemsSale)
+    
     const doc = new PDFDocument()
 
     // Configurar los encabezados para el archivo PDF

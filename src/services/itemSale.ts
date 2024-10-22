@@ -77,9 +77,12 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
           sabor: 1,
           categoria: '$categoria.descripcion'
         }
+      },
+      {
+        $sort: { descripcion: 1 } // Ordena alfabéticamente por el campo 'descripcion' (1 = ascendente, -1 = descendente)
       }
     ]
-  )
+  );
 }
 
 const updateItemsSale = async (id: Types.ObjectId, item: Partial<ItemSale>): Promise<any> => {
