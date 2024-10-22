@@ -519,17 +519,24 @@ const getCustomDataGraph = async (start: string, end: string): Promise<{ sales: 
     const month = String(currentDate.getMonth() + 1).padStart(2, '0') // Los meses en JavaScript van de 0 a 11
     const formattedDate = `${dayLabel} ${day}-${month}`
 
+    const startDay = addHours(startOfDay(currentDate), 3)
+    const endDay = addHours(endOfDay(currentDate), 3)
+
+    console.log(currentDate, startDay, endDay)
+
     // Realizar la consulta de ventas
     const responseSale = await SaleModel.aggregate([
-      { $match: { createdAt: { $gte: clearStartDate, $lte: clearEndDate } } },
+      { $match: { createdAt: { $gte: startDay, $lte: endDay } } },
       { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
     ]);
 
     // Realizar la consulta de compras
     const responseBuy = await BuyModel.aggregate([
-      { $match: { createdAt: { $gte: clearStartDate, $lte: clearEndDate } } },
+      { $match: { createdAt: { $gte: startDay, $lte: endDay } } },
       { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
     ]);
+
+    
 
     // Agregar datos de ventas
     sales.push({
