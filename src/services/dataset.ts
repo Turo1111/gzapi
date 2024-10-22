@@ -237,30 +237,32 @@ const getAnnuallyData = async (): Promise<Response[]> => {
   ]
 }
 
-const getCustomData = async (): Promise<Response[]> => {
-  const today = new Date()
-  today.setHours(today.getHours() - 3)
-  const start = addHours(startOfYear(today), 3)
-  const end = addHours(endOfYear(today), 3)
+const getCustomData = async (start: string, end: string ): Promise<Response[]> => {
+  
+  console.log("aca",start, end)
+  const startDate = new Date(start)
+  const endDate = new Date(end)
 
-  const dayStart = String(start.getDate()).padStart(2, '0')
-  const monthStart = String(start.getMonth() + 1).padStart(2, '0')
+  const clearStartDate = addHours(startOfDay(startDate), 3)
+  const clearEndDate = addHours(endOfDay(endDate), 3)
 
-  const dayEnd = String(end.getDate()).padStart(2, '0')
-  const monthEnd = String(end.getMonth() + 1).padStart(2, '0')
+  const dayStart = String(clearStartDate.getDate()).padStart(2, '0')
+  const monthStart = String(clearStartDate.getMonth() + 1).padStart(2, '0')
 
-  const year = String(today.getFullYear())
+  const dayEnd = String(clearEndDate.getDate()).padStart(2, '0')
+  const monthEnd = String(clearEndDate.getMonth() + 1).padStart(2, '0')
+
 
   const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}`
 
-  console.log(interval, year)
+  console.log(interval)
 
   const responseSale = await SaleModel.aggregate([
     {
       $match: {
         createdAt: {
-          $gte: start,
-          $lte: end
+          $gte: clearStartDate,
+          $lte: clearEndDate
         }
       }
     },
@@ -277,8 +279,8 @@ const getCustomData = async (): Promise<Response[]> => {
     {
       $match: {
         createdAt: {
-          $gte: start,
-          $lte: end
+          $gte: clearStartDate,
+          $lte: clearEndDate
         }
       }
     },
@@ -290,11 +292,12 @@ const getCustomData = async (): Promise<Response[]> => {
       }
     }
   ])
-
+ 
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: year } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: year },
-    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: year } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: year }
+    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: interval } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
+    responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: interval } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: interval }
   ]
+ return []
 }
 
 const getDailyDataGraph = async (): Promise<any> => {
@@ -495,6 +498,62 @@ const getAnnuallyDataGraph = async (): Promise<{ sales: Response[], buy: Respons
   return { sales, buy }
 }
 
+const getCustomDataGraph = async (start: string, end: string): Promise<{ sales: Response[], buy: Response[] }> => {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  // Limpiar las fechas para el cálculo
+  const clearStartDate = addHours(startOfDay(startDate), 3);
+  const clearEndDate = addHours(endOfDay(endDate), 3);
+
+  const sales = [];
+  const buy = [];
+
+  // Obtener los días en el rango de fechas
+  const currentDate = clearStartDate;
+  const endLoopDate = clearEndDate;
+
+  while (currentDate <= endLoopDate) {
+    const dayLabel = currentDate.toLocaleDateString('es-ES', { weekday: 'long' }); // Obtener el nombre del día en español
+    const day = String(currentDate.getDate()).padStart(2, '0') // Asegura que el día tenga 2 dígitos
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0') // Los meses en JavaScript van de 0 a 11
+    const formattedDate = `${dayLabel} ${day}-${month}`
+
+    // Realizar la consulta de ventas
+    const responseSale = await SaleModel.aggregate([
+      { $match: { createdAt: { $gte: clearStartDate, $lte: clearEndDate } } },
+      { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
+    ]);
+
+    // Realizar la consulta de compras
+    const responseBuy = await BuyModel.aggregate([
+      { $match: { createdAt: { $gte: clearStartDate, $lte: clearEndDate } } },
+      { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
+    ]);
+
+    // Agregar datos de ventas
+    sales.push({
+      id: sales.length,
+      label: formattedDate,
+      totalSales: responseSale[0]?.totalSales || 0,
+      salesCount: responseSale[0]?.salesCount || 0,
+    });
+
+    // Agregar datos de compras
+    buy.push({
+      id: buy.length,
+      label: formattedDate,
+      totalSales: responseBuy[0]?.totalSales || 0,
+      salesCount: responseBuy[0]?.salesCount || 0,
+    });
+
+    // Avanzar al siguiente día
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return { sales, buy };
+};
+
 const bestSelling = async (): Promise<any[]> => {
   const productosMasVendidos = await ItemSaleModel.aggregate([
     {
@@ -646,5 +705,5 @@ const dataProduct = async (): Promise<any[]> => {
 
 export {
   getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph,
-  bestSelling, highProfit, dataProduct, getCustomData
+  bestSelling, highProfit, dataProduct, getCustomData, getCustomDataGraph
 }

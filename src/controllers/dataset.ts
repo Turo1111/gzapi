@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { handleHttp } from '../utils/error.handle'
-import { getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph, bestSelling, highProfit, dataProduct } from '../services/dataset'
+import { getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyDataGraph, getWeeklyDataGraph, getMonthlyDataGraph, getAnnuallyDataGraph, bestSelling, highProfit, dataProduct, getCustomData, getCustomDataGraph } from '../services/dataset'
 
 const dailyCtrl = async (_: Request, res: Response): Promise<void> => {
   try {
@@ -43,12 +43,12 @@ const annuallyCtrl = async (_: Request, res: Response): Promise<void> => {
   }
 }
 
-const customCtrl = async (req: Request, res: Response): Promise<void> => {
+const customCtrl = async ({ params }: Request, res: Response): Promise<void> => {
   try {
-    console.log(req)
-    const response = await getAnnuallyData()
-    const response2 = await getAnnuallyDataGraph()
-    res.send({ simple: response, graph: response2 })
+    const { start, end } = params
+    const response = await getCustomData(start, end)
+    const response2 = await getCustomDataGraph(start, end)
+    res.send({simple: response, graph: response2})
   } catch (e) {
     handleHttp(res, 'ERROR_GET_ANNUALLY_DATA')
   }
