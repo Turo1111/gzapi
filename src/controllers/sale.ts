@@ -17,7 +17,7 @@ const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void
   try {
     const response = await insertSale({ ...body, user: new Types.ObjectId(user.id) })
     await Promise.all(
-      body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id, estado: true }))
+      body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id, estado: true, precioUnitario: item.precioUnitario }))
     )
     emitSocket('sale', {
       action: 'create',
@@ -48,7 +48,7 @@ const postMultipleItem = async ({ body, user }: RequestExt, res: Response): Prom
               total: item.total,
               cantidad: item.cantidad,
               idVenta: response._id,
-              estado: true
+              estado: true, precioUnitario: item.precioUnitario
             })
           )
         )
@@ -105,7 +105,7 @@ const updateItem = async ({ params, body, user }: RequestExt, res: Response): Pr
         if (item.idVenta) {
           await updateItemsSale(new Types.ObjectId(item._id), { ...item })
         } else {
-          await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id), estado: true })
+          await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id), estado: true, precioUnitario: item.precioUnitario })
         }
       })
     )
