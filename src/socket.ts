@@ -29,6 +29,14 @@ export function getIO (): ServerType {
 
 export function emitSocket (type: string, params: Object) {
   try {
+    /* if (params.res._id) {
+			controller.addReg({
+				coleccion: type,
+				accion: params.action,
+				idColeccion: params.res._id,
+				fechaHora: fechaHora
+			})
+		} */
     // @ts-expect-error
     getIO().emit(type, params)
   } catch (error) {
