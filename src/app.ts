@@ -15,6 +15,7 @@ console.log(path.join(__dirname, '..', '/public'))
 app.use(express.json())
 app.use(router)
 
+
 db().then(() => console.log('Conexion lista')).catch((e) => console.log('Ocurrio un error en la conexion con la bd', e))
 
 const server = app.listen(PORT, () => {

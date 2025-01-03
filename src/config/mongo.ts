@@ -2,8 +2,8 @@ import 'dotenv/config'
 import { connect } from 'mongoose'
 
 async function dbConnect (): Promise<void> {
-  const DB_URI = process.env.DB_URI as string
-  await connect(DB_URI)
+  const MONGODB_URI = process.env.MONGODB_URI as string
+  await connect(MONGODB_URI)
 }
 
 export default dbConnect

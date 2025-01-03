@@ -306,8 +306,9 @@ const getDailyDataGraph = async (): Promise<any> => {
   today.setHours(today.getHours() - 3)
   const todayIndex = (today.getDay() + 6) % 7 // Ajuste para que el lunes sea el día 0, martes el día 1, y así sucesivamente.
 
-  const sales = []
-  const buy = []
+  /* const sales = []
+  const buy = [] */
+  const data = []
 
   for (let i = 0; i < 7; i++) {
     const dayIndex = (todayIndex - todayIndex + i + 7) % 7 // Mantener el cálculo del índice
@@ -326,7 +327,7 @@ const getDailyDataGraph = async (): Promise<any> => {
       { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
     ])
 
-    sales.push({
+    /* sales.push({
       id: i,
       label: days[dayIndex], // Asignación correcta del día de la semana
       totalSales: responseSale[0]?.totalSales || 0,
@@ -338,19 +339,27 @@ const getDailyDataGraph = async (): Promise<any> => {
       label: days[dayIndex], // Asignación correcta del día de la semana
       totalSales: responseBuy[0]?.totalSales || 0,
       salesCount: responseBuy[0]?.salesCount || 0
+    }) */
+    
+    data.push({
+      id: i,
+      label: days[dayIndex],
+      compras: responseBuy[0]?.totalSales || 0,
+      ventas: responseSale[0]?.totalSales || 0
     })
   }
 
-  return { sales, buy }
+  return { data }
 }
 
-const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[] }> => {
+const getWeeklyDataGraph = async (): Promise<any> => {
   const today = new Date()
   today.setHours(today.getHours() - 3)
   const currentMonth = today.getMonth() // Mes actual (0 para enero, 11 para diciembre)
 
-  const sales = []
-  const buy = []
+  /* const sales = []
+  const buy = [] */
+  const data = []
 
   for (let i = 0; i < 4; i++) { // Intentando obtener datos de las últimas 4 semanas
     const start = addHours(startOfWeek(addWeeks(today, -i), { weekStartsOn: 1 }), 3)
@@ -379,7 +388,14 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
       { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
     ])
 
-    sales.push({
+    data.push({
+      id: i,
+      label: interval,
+      compras: responseBuy[0]?.totalSales || 0,
+      ventas: responseSale[0]?.totalSales || 0
+    })
+
+    /* sales.push({
       id: i,
       label: interval,
       totalSales: responseSale[0]?.totalSales || 0,
@@ -391,20 +407,21 @@ const getWeeklyDataGraph = async (): Promise<{ sales: Response[], buy: Response[
       label: interval,
       totalSales: responseBuy[0]?.totalSales || 0,
       salesCount: responseBuy[0]?.salesCount || 0
-    })
+    }) */
   }
 
-  return { sales, buy }
+  return { data }
 }
 
-const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response[] }> => {
+const getMonthlyDataGraph = async (): Promise<any> => {
   const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
   const today = new Date()
   today.setHours(today.getHours() - 3)
   const currentYear = today.getFullYear() // Año actual
 
-  const sales = []
-  const buy = []
+ /*  const sales = []
+  const buy = [] */
+  const data = []
 
   for (let i = 0; i < 12; i++) { // Intentando obtener datos de los últimos 12 meses
     const start = addHours(startOfMonth(addMonths(today, -i)), 3)
@@ -425,7 +442,20 @@ const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response
       { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
     ])
 
-    sales.push({
+    data.push({
+      id: i,
+      label: months[start.getMonth()],
+      compras: responseBuy[0]?.totalSales || 0,
+      ventas: responseSale[0]?.totalSales || 0
+    })
+
+    data.sort((a, b) => {
+      const monthA = months.indexOf(a.label)
+      const monthB = months.indexOf(b.label)
+      return monthA - monthB
+    })
+
+    /* sales.push({
       id: i,
       label: months[start.getMonth()],
       totalSales: responseSale[0]?.totalSales || 0,
@@ -437,11 +467,11 @@ const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response
       label: months[start.getMonth()],
       totalSales: responseBuy[0]?.totalSales || 0,
       salesCount: responseBuy[0]?.salesCount || 0
-    })
+    }) */
   }
 
   // Ordenar los datos por mes en orden ascendente
-  sales.sort((a, b) => {
+  /* sales.sort((a, b) => {
     const monthA = months.indexOf(a.label)
     const monthB = months.indexOf(b.label)
     return monthA - monthB
@@ -451,16 +481,17 @@ const getMonthlyDataGraph = async (): Promise<{ sales: Response[], buy: Response
     const monthA = months.indexOf(a.label)
     const monthB = months.indexOf(b.label)
     return monthA - monthB
-  })
+  }) */
 
-  return { sales, buy }
+  return { data }
 }
 
-const getAnnuallyDataGraph = async (): Promise<{ sales: Response[], buy: Response[] }> => {
+const getAnnuallyDataGraph = async (): Promise<any> => {
   const today = new Date()
   today.setHours(today.getHours() - 3)
-  const sales = []
-  const buy = []
+  /* const sales = []
+  const buy = [] */
+  const data = []
 
   for (let i = 0; i < 5; i++) { // Obteniendo datos de los últimos 5 años
     const start = addHours(startOfYear(addYears(today, -i)), 3)
@@ -476,7 +507,16 @@ const getAnnuallyDataGraph = async (): Promise<{ sales: Response[], buy: Respons
       { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
     ])
 
-    sales.push({
+    data.push({
+      id: i,
+      label: `${start.getFullYear()}`,
+      compras: responseBuy[0]?.totalSales || 0,
+      ventas: responseSale[0]?.totalSales || 0
+    })
+
+    data.sort((a, b) => parseInt(a.label) - parseInt(b.label))
+
+    /* sales.push({
       id: i,
       label: `${start.getFullYear()}`,
       totalSales: responseSale[0]?.totalSales || 0,
@@ -488,17 +528,17 @@ const getAnnuallyDataGraph = async (): Promise<{ sales: Response[], buy: Respons
       label: `${start.getFullYear()}`,
       totalSales: responseBuy[0]?.totalSales || 0,
       salesCount: responseBuy[0]?.salesCount || 0
-    })
+    }) */
   }
 
   // Ordenar los datos por año en orden ascendente
-  sales.sort((a, b) => parseInt(a.label) - parseInt(b.label))
-  buy.sort((a, b) => parseInt(a.label) - parseInt(b.label))
+  /* sales.sort((a, b) => parseInt(a.label) - parseInt(b.label))
+  buy.sort((a, b) => parseInt(a.label) - parseInt(b.label)) */
 
-  return { sales, buy }
+  return { data }
 }
 
-const getCustomDataGraph = async (start: string, end: string): Promise<{ sales: Response[], buy: Response[] }> => {
+const getCustomDataGraph = async (start: string, end: string): Promise<any> => {
   const startDate = new Date(start);
   const endDate = new Date(end);
 
@@ -506,8 +546,9 @@ const getCustomDataGraph = async (start: string, end: string): Promise<{ sales: 
   const clearStartDate = addHours(startOfDay(startDate), 3);
   const clearEndDate = addHours(endOfDay(endDate), 3);
 
-  const sales = [];
-  const buy = [];
+  /* const sales = [];
+  const buy = []; */
+  const data = []
 
   // Obtener los días en el rango de fechas
   const currentDate = clearStartDate;
@@ -536,10 +577,16 @@ const getCustomDataGraph = async (start: string, end: string): Promise<{ sales: 
       { $group: { _id: null, totalSales: { $sum: '$total' }, salesCount: { $sum: 1 } } }
     ]);
 
-    
+    data.push({
+      label: formattedDate,
+      compras: responseBuy[0]?.totalSales || 0,
+      ventas: responseSale[0]?.totalSales || 0
+    })
+
+    data.sort((a, b) => parseInt(a.label) - parseInt(b.label))
 
     // Agregar datos de ventas
-    sales.push({
+    /* sales.push({
       id: sales.length,
       label: formattedDate,
       totalSales: responseSale[0]?.totalSales || 0,
@@ -553,12 +600,12 @@ const getCustomDataGraph = async (start: string, end: string): Promise<{ sales: 
       totalSales: responseBuy[0]?.totalSales || 0,
       salesCount: responseBuy[0]?.salesCount || 0,
     });
-
+ */
     // Avanzar al siguiente día
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return { sales, buy };
+  return { data };
 };
 
 const bestSelling = async (): Promise<any[]> => {

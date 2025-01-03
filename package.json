@@ -2,7 +2,7 @@
   "name": "gzapi",
   "version": "1.0.0",
   "description": "api golozur",
-  "main": "./src/app.ts",
+  "main": "app.ts",
   "scripts": {
     "lint": "ts-standard",
     "dev": "nodemon ./src/app.ts",
