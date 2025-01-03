@@ -137,18 +137,21 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
         precioBulto: 1,
         precioCompra: 1,
         precioUnitario: 1,
-        idCategoria: '$categoria._id',
-        idProveedor: '$proveedor._id',
-        idMarca: '$marca._id',
-        categoria: '$categoria.descripcion',
-        proveedor: '$proveedor.descripcion',
-        marca: '$marca.descripcion'
+        categoria: '$categoria._id',
+          proveedor: '$proveedor._id',
+          marca: '$marca._id',
+          NameProveedor: '$proveedor.descripcion',
+          NameMarca: '$marca.descripcion',
+          NameCategoria: '$categoria.descripcion'
       }
     },
     {
       $match: query
     },
     {
+      $sort: { NameCategoria: 1 }
+    }
+    /* {
       $group: {
         _id: '$categoria', // Agrupamos por el nombre de la categoría
         productos: {
@@ -174,7 +177,7 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
         categoria: '$_id', // Mantenemos el nombre de la categoría
         productos: 1 // Mantenemos la lista de productos
       }
-    }
+    } */
   ])
 }
 

@@ -191,9 +191,10 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
     doc.pipe(res)
     const logoPath = path.join(__dirname, '../../public/image/LOGO.png')
     doc.image(logoPath, 450, 5, { width: 100 })
-    let yPosition = 0
+    let categorieActive: (string | undefined) = ''
+    /* let yPosition = 0 */
     // Iterar sobre cada categoría
-    products.forEach((item: { categoria: string, productos: [] }) => {
+    /* products.forEach((item: { categoria: string, productos: [] }) => {
       doc.fontSize(18).font('Helvetica-Bold').fillColor('#3764A0')
         .text(`${item.categoria}`, 25, yPosition + 25)
       yPosition += 25
@@ -201,19 +202,34 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
         doc.fontSize(14).font('Helvetica').fillColor('black').text(`${itemProduct.descripcion}`, 50, yPosition + 25)
         doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50').text(`$ ${itemProduct.precioUnitario}`, 450, yPosition + 25)
         yPosition += 25
+        console.log(yPosition)
         if (yPosition === 700) {
+          console.log('suma pagina', itemProduct.descripcion)
           doc.addPage()
           yPosition = 25
           doc.image(logoPath, 450, 5, { width: 100 })
         }
       })
+      console.log(yPosition)
       if (yPosition === 700) {
+        console.log('suma pagina 2', item.categoria)
         doc.addPage()
         yPosition = 25
         doc.image(logoPath, 450, 5, { width: 100 })
       }
+    }) */
+    products.forEach((itemProduct: Product)=>{
+      /* console.log('producto', itemProduct) */
+      if (itemProduct.NameCategoria !== categorieActive) {
+        categorieActive = itemProduct.NameCategoria
+        doc.fontSize(18).font('Helvetica-Bold').fillColor('#3764A0')
+        .text(`${categorieActive}`, 25)
+      }
+      doc.fontSize(14).font('Helvetica').fillColor('black').text(`${itemProduct.descripcion}`, 50)
+      doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50').text(`$ ${itemProduct.precioUnitario}`, 450)
+      doc.on('pageAdded', () => doc.image(logoPath, 450, 5, { width: 100 }));
     })
-
+    
     // Finalizar el documento
     doc.end()
   } catch (e) {
