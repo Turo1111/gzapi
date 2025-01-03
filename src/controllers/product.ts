@@ -219,6 +219,7 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
       }
     }) */
     products.forEach((itemProduct: Product)=>{
+      
       /* console.log('producto', itemProduct) */
       if (itemProduct.NameCategoria !== categorieActive) {
         categorieActive = itemProduct.NameCategoria
