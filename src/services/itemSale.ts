@@ -95,4 +95,172 @@ const deleteItemsSale = async (id: Types.ObjectId): Promise<any> => {
   return response
 }
 
-export { insertItemSale, getItemSales, getItemSale, updateItemsSale, deleteItemsSale }
+const getSoldProductsByDateRange = async (start: string, end: string): Promise<any> => {
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  try {
+    const result = await ItemSaleModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$idProducto',
+          totalVendido: { $sum: '$cantidad' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'producto'
+        }
+      },
+      {
+        $unwind: '$producto'
+      },
+      {
+        $project: {
+          _id: 0,
+          producto: '$producto.descripcion',
+          idProveedor: '$producto.proveedor',
+          totalVendido: 1
+        }
+      },
+      {
+        $lookup: {
+          from: 'providers',
+          localField: 'idProveedor',
+          foreignField: '_id',
+          as: 'proveedor'
+        }
+      },
+      {
+        $unwind: '$proveedor'
+      },
+      {
+        $project: {
+          _id: 0,
+          producto: 1,
+          NameProvider: '$proveedor.descripcion',
+          totalVendido: 1
+        }
+      },
+      {
+        $sort: { totalVendido: -1 }
+      } 
+    ]);
+
+    return result;
+  } catch (error) {
+    console.error('Error en la consulta:', error);
+    throw error;
+  }
+};
+
+/* const getSoldProductsByDateRange = async (start: string, end: string): Promise<any> => {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  // Calcular las fechas de las 4 semanas anteriores
+  const previousWeeks = Array.from({ length: 4 }, (_, i) => {
+    const weekStart = new Date(startDate);
+    weekStart.setDate(weekStart.getDate() - 7 * (i + 1));
+
+    const weekEnd = new Date(endDate);
+    weekEnd.setDate(weekEnd.getDate() - 7 * (i + 1));
+
+    return { weekStart, weekEnd };
+  });
+
+  try {
+    // Consulta para el intervalo dado y las 4 semanas anteriores
+    const result = await ItemSaleModel.aggregate([
+      {
+        $match: {
+          $or: [
+            // Intervalo dado
+            {
+              createdAt: {
+                $gte: startDate,
+                $lte: endDate,
+              },
+            },
+            // 4 semanas anteriores
+            ...previousWeeks.map(({ weekStart, weekEnd }) => ({
+              createdAt: {
+                $gte: weekStart,
+                $lte: weekEnd,
+              },
+            })),
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: '$idProducto',
+          totalVendido: { $sum: '$cantidad' },
+          count: { $sum: 1 }, // Contar cuántas semanas contribuyeron
+        },
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'producto',
+        },
+      },
+      {
+        $unwind: '$producto',
+      },
+      {
+        $project: {
+          _id: 0,
+          producto: '$producto.descripcion',
+          idProveedor: '$producto.proveedor',
+          totalVendido: 1,
+          count: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: 'providers',
+          localField: 'idProveedor',
+          foreignField: '_id',
+          as: 'proveedor',
+        },
+      },
+      {
+        $unwind: '$proveedor',
+      },
+      {
+        $project: {
+          _id: 0,
+          producto: 1,
+          NameProvider: '$proveedor.descripcion',
+          totalVendido: 1,
+          promedioVendido: { $divide: ['$totalVendido', '$count'] }, // Calcular el promedio
+        },
+      },
+      {
+        $sort: { totalVendido: -1 },
+      },
+    ]);
+
+    return result;
+  } catch (error) {
+    console.error('Error en la consulta:', error);
+    throw error;
+  }
+}; */
+
+export { insertItemSale, getItemSales, getItemSale, updateItemsSale, deleteItemsSale, getSoldProductsByDateRange }

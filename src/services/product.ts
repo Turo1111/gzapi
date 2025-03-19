@@ -45,6 +45,7 @@ const getAllProducts = async (): Promise<Product[]> => {
           precioBulto: 1,
           precioCompra: 1,
           precioUnitario: 1,
+          precioDescuento: 1,
           categoria: '$categoria._id',
           proveedor: '$proveedor._id',
           marca: '$marca._id',
@@ -137,6 +138,7 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
         precioBulto: 1,
         precioCompra: 1,
         precioUnitario: 1,
+        precioDescuento: 1,
         idCategoria: '$categoria._id',
         idProveedor: '$proveedor._id',
         idMarca: '$marca._id',
@@ -162,6 +164,7 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
             precioBulto: '$precioBulto',
             precioCompra: '$precioCompra',
             precioUnitario: '$precioUnitario',
+            precioDescuento: '$precioDescuento',
             proveedor: '$proveedor', // Nombre del proveedor
             marca: '$marca' // Nombre de la marca
           }
@@ -216,6 +219,7 @@ const getProducts = async (skip: number, limit: number): Promise<Product[]> => {
           precioBulto: 1,
           precioCompra: 1,
           precioUnitario: 1,
+          precioDescuento: 1,
           categoria: '$categoria._id',
           proveedor: '$proveedor._id',
           marca: '$marca._id',
@@ -300,6 +304,7 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
           stock: 1,
           codigoBarra: 1,
           precioUnitario: 1,
+          precioDescuento: 1,
           categoria: '$categoria._id',
           marca: '$marca._id',
           proveedor: '$proveedor._id',
@@ -382,6 +387,7 @@ const getProduct = async (id: Types.ObjectId): Promise<any> => {
           precioBulto: 1,
           precioCompra: 1,
           precioUnitario: 1,
+          precioDescuento: 1,
           porcentaje: 1,
           categoria: '$categoria._id',
           proveedor: '$proveedor._id',

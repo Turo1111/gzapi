@@ -17,12 +17,15 @@ const getDailyData = async (): Promise<Response[]> => {
   const start = addHours(startOfDay(today), 3)
   const end = addHours(endOfDay(today), 3)
   const todayIndex = (today.getDay() + 6) % 7
+  const startBefore = new Date(start);
+  startBefore.setDate(startBefore.getDate() - 1);
+
+  const endBefore = new Date(end);
+  endBefore.setDate(endBefore.getDate() - 1);
 
   const day = String(today.getDate()).padStart(2, '0') // Asegura que el día tenga 2 dígitos
   const month = String(today.getMonth() + 1).padStart(2, '0') // Los meses en JavaScript van de 0 a 11
   const formattedDate = `${days[todayIndex]} ${day}-${month}`
-
-  console.log('daily data', days[todayIndex])
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -30,6 +33,24 @@ const getDailyData = async (): Promise<Response[]> => {
         createdAt: {
           $gte: start,
           $lte: end
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$total' },
+        salesCount: { $sum: 1 }
+      }
+    }
+  ])
+
+  const responseSaleBefore = await SaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startBefore,
+          $lte: endBefore
         }
       }
     },
@@ -61,7 +82,15 @@ const getDailyData = async (): Promise<Response[]> => {
   ])
 
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: formattedDate } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: formattedDate },
+    responseSale[0] ? {
+      ...responseSale[0], 
+      label: 'sale', 
+      id: 0, 
+      date: formattedDate,
+      totalSalesDifference: `${(((responseSale[0].totalSales - responseSaleBefore[0].totalSales) / responseSaleBefore[0].totalSales) * 100).toFixed(2)}`,
+      salesCountDifference: `${(((responseSale[0].salesCount - responseSaleBefore[0].salesCount) / responseSaleBefore[0].salesCount) * 100).toFixed(2)}`
+    } : 
+    { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: formattedDate, totalSalesDifference: 0, salesCountDifference: 0 },
     responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: formattedDate } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: formattedDate }
   ]
 }
@@ -71,6 +100,12 @@ const getWeeklyData = async (): Promise<Response[]> => {
   today.setHours(today.getHours() - 3)
   const start = addHours(startOfWeek(today), 27)
   const end = addHours(endOfWeek(today), 27)
+
+  const startBefore = new Date(start);
+  startBefore.setDate(startBefore.getDate() - 7);
+
+  const endBefore = new Date(end);
+  endBefore.setDate(endBefore.getDate() - 7);
 
   const dayStart = String(start.getDate()).padStart(2, '0')
   const monthStart = String(start.getMonth() + 1).padStart(2, '0')
@@ -98,6 +133,24 @@ const getWeeklyData = async (): Promise<Response[]> => {
     }
   ])
 
+  const responseSaleBefore = await SaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startBefore,
+          $lte: endBefore
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$total' },
+        salesCount: { $sum: 1 }
+      }
+    }
+  ])
+
   const responseBuy = await BuyModel.aggregate([
     {
       $match: {
@@ -116,8 +169,17 @@ const getWeeklyData = async (): Promise<Response[]> => {
     }
   ])
 
+  const rpSale ={
+    ...responseSale[0], 
+    label: 'sale', 
+    id: 0, 
+    date: interval,
+    totalSalesDifference: `${(((responseSale[0].totalSales - responseSaleBefore[0].totalSales) / responseSaleBefore[0].totalSales) * 100).toFixed(2)}`,
+    salesCountDifference: `${(((responseSale[0].salesCount - responseSaleBefore[0].salesCount) / responseSaleBefore[0].salesCount) * 100).toFixed(2)}`
+  }
+
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: interval } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
+    responseSale[0] ? { ...rpSale } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
     responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: interval } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: interval }
   ]
 }
@@ -129,11 +191,15 @@ const getMonthlyData = async (): Promise<Response[]> => {
   const start = addHours(startOfMonth(today), 3)
   const end = addHours(endOfMonth(today), 3)
 
+  const startBefore = new Date(start);
+  startBefore.setMonth(startBefore.getMonth() - 1);
+
+  const endBefore = new Date(end);
+  endBefore.setMonth(endBefore.getMonth() - 1)
+
   const month = String(today.getMonth())
   const year = String(today.getFullYear())
   const interval = `${months[parseFloat(month)] + ' del ' + year}`
-
-  console.log(month, months[parseFloat(month)])
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -141,6 +207,24 @@ const getMonthlyData = async (): Promise<Response[]> => {
         createdAt: {
           $gte: start,
           $lte: end
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$total' },
+        salesCount: { $sum: 1 }
+      }
+    }
+  ])
+
+  const responseSaleBefore = await SaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startBefore,
+          $lte: endBefore
         }
       }
     },
@@ -171,8 +255,17 @@ const getMonthlyData = async (): Promise<Response[]> => {
     }
   ])
 
+  const rpSale ={
+    ...responseSale[0], 
+    label: 'sale', 
+    id: 0, 
+    date: interval,
+    totalSalesDifference: `${(((responseSale[0].totalSales - responseSaleBefore[0].totalSales) / responseSaleBefore[0].totalSales) * 100).toFixed(2)}`,
+    salesCountDifference: `${(((responseSale[0].salesCount - responseSaleBefore[0].salesCount) / responseSaleBefore[0].salesCount) * 100).toFixed(2)}`
+  }
+
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: interval } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
+    responseSale[0] ? { ...rpSale } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
     responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: interval } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: interval }
   ]
 }
@@ -183,17 +276,21 @@ const getAnnuallyData = async (): Promise<Response[]> => {
   const start = addHours(startOfYear(today), 3)
   const end = addHours(endOfYear(today), 3)
 
-  const dayStart = String(start.getDate()).padStart(2, '0')
+  const startBefore = new Date(start);
+  startBefore.setFullYear(startBefore.getFullYear() - 1);
+
+  const endBefore = new Date(end);
+  endBefore.setFullYear(endBefore.getFullYear() - 1);
+
+  /* const dayStart = String(start.getDate()).padStart(2, '0')
   const monthStart = String(start.getMonth() + 1).padStart(2, '0')
 
   const dayEnd = String(end.getDate()).padStart(2, '0')
-  const monthEnd = String(end.getMonth() + 1).padStart(2, '0')
+  const monthEnd = String(end.getMonth() + 1).padStart(2, '0') */
 
   const year = String(today.getFullYear())
 
-  const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}`
-
-  console.log(interval, year)
+  /* const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}` */
 
   const responseSale = await SaleModel.aggregate([
     {
@@ -201,6 +298,24 @@ const getAnnuallyData = async (): Promise<Response[]> => {
         createdAt: {
           $gte: start,
           $lte: end
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$total' },
+        salesCount: { $sum: 1 }
+      }
+    }
+  ])
+
+  const responseSaleBefore = await SaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startBefore,
+          $lte: endBefore
         }
       }
     },
@@ -231,20 +346,39 @@ const getAnnuallyData = async (): Promise<Response[]> => {
     }
   ])
 
+  const rpSale ={
+    ...responseSale[0], 
+    label: 'sale', 
+    id: 0, 
+    date: year,
+    totalSalesDifference: `${(((responseSale[0].totalSales - responseSaleBefore[0].totalSales) / responseSaleBefore[0].totalSales) * 100).toFixed(2)}`,
+    salesCountDifference: `${(((responseSale[0].salesCount - responseSaleBefore[0].salesCount) / responseSaleBefore[0].salesCount) * 100).toFixed(2)}`
+  }
+
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: year } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: year },
+    responseSale[0] ? { ...rpSale } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: year },
     responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: year } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: year }
   ]
 }
 
 const getCustomData = async (start: string, end: string ): Promise<Response[]> => {
   
-  console.log("aca",start, end)
-  const startDate = new Date(start)
-  const endDate = new Date(end)
+const startDate = new Date(start);
+const endDate = new Date(end);
 
-  const clearStartDate = addHours(startOfDay(startDate), 3)
-  const clearEndDate = addHours(endOfDay(endDate), 3)
+const clearStartDate = addHours(startOfDay(startDate), 3);
+const clearEndDate = addHours(endOfDay(endDate), 3);
+
+// Calcular la diferencia de días (en valor absoluto)
+const differenceInMilliseconds = Math.abs(clearEndDate.getTime() - clearStartDate.getTime());
+const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
+
+// Calcular las fechas anteriores
+const startBefore = new Date(clearStartDate);
+startBefore.setDate(startBefore.getDate() - differenceInDays);
+
+const endBefore = new Date(clearEndDate);
+endBefore.setDate(endBefore.getDate() - differenceInDays);
 
   const dayStart = String(clearStartDate.getDate()).padStart(2, '0')
   const monthStart = String(clearStartDate.getMonth() + 1).padStart(2, '0')
@@ -255,14 +389,30 @@ const getCustomData = async (start: string, end: string ): Promise<Response[]> =
 
   const interval = `${dayStart + '-' + monthStart + ' a ' + dayEnd + '-' + monthEnd}`
 
-  console.log(interval)
-
   const responseSale = await SaleModel.aggregate([
     {
       $match: {
         createdAt: {
           $gte: clearStartDate,
           $lte: clearEndDate
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$total' },
+        salesCount: { $sum: 1 }
+      }
+    }
+  ])
+
+  const responseSaleBefore = await SaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startBefore,
+          $lte: endBefore
         }
       }
     },
@@ -292,9 +442,18 @@ const getCustomData = async (start: string, end: string ): Promise<Response[]> =
       }
     }
   ])
+
+  const rpSale ={
+    ...responseSale[0], 
+    label: 'sale', 
+    id: 0, 
+    date: interval,
+    totalSalesDifference: `${(((responseSale[0].totalSales - responseSaleBefore[0].totalSales) / responseSaleBefore[0].totalSales) * 100).toFixed(2)}`,
+    salesCountDifference: `${(((responseSale[0].salesCount - responseSaleBefore[0].salesCount) / responseSaleBefore[0].salesCount) * 100).toFixed(2)}`
+  }
  
   return [
-    responseSale[0] ? { ...responseSale[0], label: 'sale', id: 0, date: interval } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
+    responseSale[0] ? { ...rpSale } : { totalSales: 0, salesCount: 0, label: 'sale', id: 0, date: interval },
     responseBuy[0] ? { ...responseBuy[0], label: 'buy', id: 1, date: interval } : { totalSales: 0, salesCount: 0, label: 'buy', id: 1, date: interval }
   ]
  return []
@@ -562,8 +721,6 @@ const getCustomDataGraph = async (start: string, end: string): Promise<any> => {
 
     const startDay = addHours(startOfDay(currentDate), 3)
     const endDay = addHours(endOfDay(currentDate), 3)
-
-    console.log(currentDate, startDay, endDay)
 
     // Realizar la consulta de ventas
     const responseSale = await SaleModel.aggregate([

@@ -43,6 +43,10 @@ const ProductSchema = new Schema<Product>(
       type: Number,
       maxDecimalPlaces: 2
     },
+    precioDescuento: {
+      type: Number,
+      maxDecimalPlaces: 2
+    },
     categoria: {
       type: Schema.ObjectId,
       ref: 'Categoria',

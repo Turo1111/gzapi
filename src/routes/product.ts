@@ -9,11 +9,11 @@ router.get('/:id', checkJwt, getItem)
 router.get('/', getAllItems)
 router.post('/skip', getItems)
 router.post('/search', getItems)
-router.post('/', checkJwt, postItem)
+router.post('/', checkJwt, postItem) //este
 /* router.post('/uploadImage', multerMiddleware.single('myfile'), compressImage, uploadImage) */
 router.get('/image/:image', getImage)
 router.get('/active', getNothing)
-router.patch('/:id', checkJwt, uptdateItem)
+router.patch('/:id', checkJwt, uptdateItem) //este
 router.patch('/', checkJwt, uptdateItems)
 router.delete('/:id', checkJwt, deleteItem)
 router.post('/print/print', checkJwt, printList)
