@@ -179,7 +179,8 @@ const getAllItems = async (_: RequestExt, res: Response): Promise<void> => {
 
 const printList = async ({ body }: RequestExt, res: Response): Promise<void> => {
   try {
-    const { categories } = body
+    const { categories, isPrecioUnitario } = body
+    console.log('isPrecioUnitario', isPrecioUnitario)
     const products = await getAllProductsCategories(categories)
     if (products.length === 0) {
       res.status(404).send('Products not found')
@@ -192,42 +193,49 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
     const logoPath = path.join(__dirname, '../../public/image/LOGO.png')
     doc.image(logoPath, 450, 5, { width: 100 })
     let categorieActive: (string | undefined) = ''
-    /* let yPosition = 0 */
-    // Iterar sobre cada categoría
-    /* products.forEach((item: { categoria: string, productos: [] }) => {
-      doc.fontSize(18).font('Helvetica-Bold').fillColor('#3764A0')
-        .text(`${item.categoria}`, 25, yPosition + 25)
-      yPosition += 25
-      item.productos.forEach((itemProduct: Product) => {
-        doc.fontSize(14).font('Helvetica').fillColor('black').text(`${itemProduct.descripcion}`, 50, yPosition + 25)
-        doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50').text(`$ ${itemProduct.precioUnitario}`, 450, yPosition + 25)
-        yPosition += 25
-        console.log(yPosition)
-        if (yPosition === 700) {
-          console.log('suma pagina', itemProduct.descripcion)
-          doc.addPage()
-          yPosition = 25
-          doc.image(logoPath, 450, 5, { width: 100 })
-        }
-      })
-      console.log(yPosition)
-      if (yPosition === 700) {
-        console.log('suma pagina 2', item.categoria)
-        doc.addPage()
-        yPosition = 25
-        doc.image(logoPath, 450, 5, { width: 100 })
-      }
-    }) */
+
     products.forEach((itemProduct: Product)=>{
-      
-      /* console.log('producto', itemProduct) */
       if (itemProduct.NameCategoria !== categorieActive) {
         categorieActive = itemProduct.NameCategoria
         doc.fontSize(18).font('Helvetica-Bold').fillColor('#3764A0')
         .text(`${categorieActive}`, 25)
       }
-      doc.fontSize(14).font('Helvetica').fillColor('black').text(`${itemProduct.descripcion}`, 50)
-      doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50').text(`$ ${itemProduct.precioUnitario}`, 450)
+      
+      const yPosition = doc.y;
+
+      // Escribir la descripción del producto
+      doc.fontSize(14).font('Helvetica').fillColor('black')
+        .text(`${itemProduct.descripcion}`, 50, yPosition);
+
+      // Escribir el precio del producto en la misma posición Y
+      if (itemProduct.precioDescuento !== undefined && itemProduct.precioDescuento > 0) {
+        if (isPrecioUnitario || isPrecioUnitario === undefined) {
+          doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50')
+            .text(`$ ${itemProduct.precioUnitario}`, 440, yPosition);
+        } else {
+          doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50')
+            .text(`$ ${itemProduct.precioDescuento}`, 440, yPosition);
+        }
+      } else {
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50')
+          .text(`$ ${itemProduct.precioUnitario}`, 440, yPosition);
+      }
+      
+      doc.moveDown(0.1);
+
+      doc.lineWidth(0.5);
+      doc.strokeColor('#d9d9d9');
+
+      doc.moveTo(20, doc.y)
+      .lineTo(550, doc.y)
+      .stroke();
+
+      doc.moveDown(0.3);
+
+      if (yPosition > 680) {
+        doc.addPage()
+      }
+
       doc.on('pageAdded', () => doc.image(logoPath, 450, 5, { width: 100 }));
     })
     

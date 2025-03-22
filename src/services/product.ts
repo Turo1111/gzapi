@@ -138,22 +138,13 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
         precioBulto: 1,
         precioCompra: 1,
         precioUnitario: 1,
-<<<<<<< HEAD
         precioDescuento: 1,
         idCategoria: '$categoria._id',
         idProveedor: '$proveedor._id',
         idMarca: '$marca._id',
-        categoria: '$categoria.descripcion',
-        proveedor: '$proveedor.descripcion',
-        marca: '$marca.descripcion'
-=======
-        categoria: '$categoria._id',
-          proveedor: '$proveedor._id',
-          marca: '$marca._id',
-          NameProveedor: '$proveedor.descripcion',
-          NameMarca: '$marca.descripcion',
-          NameCategoria: '$categoria.descripcion'
->>>>>>> b7161d905aebab19837cde6cf2823b9f4b788e3f
+        NameCategoria: '$categoria.descripcion',
+        NameProveedor: '$proveedor.descripcion',
+        NameMarca: '$marca.descripcion'
       }
     },
     {
