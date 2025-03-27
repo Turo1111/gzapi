@@ -1,6 +1,7 @@
 import { Types } from 'mongoose'
 import { ItemSale } from '../interfaces/sale.interface'
 import ItemSaleModel from '../models/itemSale'
+import { endOfWeek, startOfWeek, subWeeks } from 'date-fns'
 
 const insertItemSale = async (item: ItemSale): Promise<ItemSale> => {
   const responseInsert = await ItemSaleModel.create(item)
@@ -95,25 +96,41 @@ const deleteItemsSale = async (id: Types.ObjectId): Promise<any> => {
   return response
 }
 
-const getSoldProductsByDateRange = async (start: string, end: string): Promise<any> => {
+const getListBuyAvg = async (prov: string): Promise<any> => {
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  const hoy = new Date();
+  const startDate = startOfWeek(subWeeks(hoy, 4));
+  const endDate = endOfWeek(subWeeks(hoy, 1));
+
+  console.log('avg', startDate, endDate)
 
   try {
     const result = await ItemSaleModel.aggregate([
       {
         $match: {
           createdAt: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
+            $gte: startDate,
+            $lte: endDate
           }
         }
       },
       {
         $group: {
-          _id: '$idProducto',
-          totalVendido: { $sum: '$cantidad' }
+          _id: {
+            week: { $week: "$createdAt" },
+            productId: "$idProducto"
+          },
+          weeklySales: { $sum: "$cantidad" },
+          createdAt: { $first: "$createdAt" },
+          precioCompra: { $first: "$precioCompra" }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.productId",
+          totalSales: { $sum: "$weeklySales" },
+          weeklyAverages: { $avg: "$weeklySales" },
+          productDetails: { $first: "$productData" }
         }
       },
       {
@@ -128,17 +145,9 @@ const getSoldProductsByDateRange = async (start: string, end: string): Promise<a
         $unwind: '$producto'
       },
       {
-        $project: {
-          _id: 0,
-          producto: '$producto.descripcion',
-          idProveedor: '$producto.proveedor',
-          totalVendido: 1
-        }
-      },
-      {
         $lookup: {
           from: 'providers',
-          localField: 'idProveedor',
+          localField: 'producto.proveedor',
           foreignField: '_id',
           as: 'proveedor'
         }
@@ -146,14 +155,23 @@ const getSoldProductsByDateRange = async (start: string, end: string): Promise<a
       {
         $unwind: '$proveedor'
       },
-      {
+  		{
         $project: {
           _id: 0,
-          producto: 1,
-          NameProvider: '$proveedor.descripcion',
-          totalVendido: 1
+          idProducto: '$producto._id',
+          descripcion: '$producto.descripcion',
+          precio: '$producto.precioCompra',
+          proveedor: '$proveedor.descripcion',
+          totalVendido: '$totalSales',
+          cantidad: { $ceil: '$weeklyAverages' },
+          total: {$multiply: ['$producto.precioCompra', { $ceil: '$weeklyAverages' }]}
         }
       },
+  		{
+    		$match: {
+      		proveedor: prov,
+    		}
+  		},
       {
         $sort: { totalVendido: -1 }
       } 
@@ -166,101 +184,73 @@ const getSoldProductsByDateRange = async (start: string, end: string): Promise<a
   }
 };
 
-/* const getSoldProductsByDateRange = async (start: string, end: string): Promise<any> => {
+const getListBuyByDateRange = async (start: string, end: string, prov: string): Promise<any> => {
+
   const startDate = new Date(start);
   const endDate = new Date(end);
 
-  // Calcular las fechas de las 4 semanas anteriores
-  const previousWeeks = Array.from({ length: 4 }, (_, i) => {
-    const weekStart = new Date(startDate);
-    weekStart.setDate(weekStart.getDate() - 7 * (i + 1));
+  const response = await ItemSaleModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      }
+    },
+    {
+      $group: {
+        _id: "$idProducto",
+        cantidad: { $sum: "$cantidad" },
+        createdAt: { $first: "$createdAt" }
+      }
+    },
+    {
+      $lookup: {
+        from: 'products',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'producto'
+      }
+    },
+    {
+      $unwind: '$producto'
+    },
+  
+    {
+      $lookup: {
+        from: 'providers',
+        localField: 'producto.proveedor',
+        foreignField: '_id',
+        as: 'proveedor'
+      }
+    },
+    {
+      $unwind: '$proveedor'
+    },
+    {
+      $project: {
+        _id: 0,
+        idProducto: '$producto._id',
+        descripcion: '$producto.descripcion',
+        precio: '$producto.precioCompra',
+        proveedor: '$proveedor.descripcion',
+        cantidad: 1,
+        createdAt: "$createdAt",
+        total: {$multiply: ['$producto.precioCompra', '$cantidad' ]}
+      }
+    },
+    {
+      $match: {
+        proveedor: prov,
+      }
+    },
+    {
+      $sort: { cantidad: -1 }
+    }
+  ])
 
-    const weekEnd = new Date(endDate);
-    weekEnd.setDate(weekEnd.getDate() - 7 * (i + 1));
+  return response
+}
 
-    return { weekStart, weekEnd };
-  });
-
-  try {
-    // Consulta para el intervalo dado y las 4 semanas anteriores
-    const result = await ItemSaleModel.aggregate([
-      {
-        $match: {
-          $or: [
-            // Intervalo dado
-            {
-              createdAt: {
-                $gte: startDate,
-                $lte: endDate,
-              },
-            },
-            // 4 semanas anteriores
-            ...previousWeeks.map(({ weekStart, weekEnd }) => ({
-              createdAt: {
-                $gte: weekStart,
-                $lte: weekEnd,
-              },
-            })),
-          ],
-        },
-      },
-      {
-        $group: {
-          _id: '$idProducto',
-          totalVendido: { $sum: '$cantidad' },
-          count: { $sum: 1 }, // Contar cuántas semanas contribuyeron
-        },
-      },
-      {
-        $lookup: {
-          from: 'products',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'producto',
-        },
-      },
-      {
-        $unwind: '$producto',
-      },
-      {
-        $project: {
-          _id: 0,
-          producto: '$producto.descripcion',
-          idProveedor: '$producto.proveedor',
-          totalVendido: 1,
-          count: 1,
-        },
-      },
-      {
-        $lookup: {
-          from: 'providers',
-          localField: 'idProveedor',
-          foreignField: '_id',
-          as: 'proveedor',
-        },
-      },
-      {
-        $unwind: '$proveedor',
-      },
-      {
-        $project: {
-          _id: 0,
-          producto: 1,
-          NameProvider: '$proveedor.descripcion',
-          totalVendido: 1,
-          promedioVendido: { $divide: ['$totalVendido', '$count'] }, // Calcular el promedio
-        },
-      },
-      {
-        $sort: { totalVendido: -1 },
-      },
-    ]);
-
-    return result;
-  } catch (error) {
-    console.error('Error en la consulta:', error);
-    throw error;
-  }
-}; */
-
-export { insertItemSale, getItemSales, getItemSale, updateItemsSale, deleteItemsSale, getSoldProductsByDateRange }
+export { insertItemSale, getItemSales, getItemSale, updateItemsSale, deleteItemsSale, getListBuyAvg, getListBuyByDateRange }

@@ -4,7 +4,7 @@ import { emitSocket } from '../socket'
 import { handleHttp } from '../utils/error.handle'
 import { JwtPayload } from 'jsonwebtoken'
 import { Types } from 'mongoose'
-import { deleteItemsSale, getItemSale, getItemSales, getSoldProductsByDateRange, insertItemSale, updateItemsSale } from '../services/itemSale'
+import { deleteItemsSale, getItemSale, getItemSales, getListBuyAvg, getListBuyByDateRange, insertItemSale, updateItemsSale } from '../services/itemSale'
 
 interface RequestExt extends Request {
   user?: string | JwtPayload | undefined | any
@@ -61,14 +61,25 @@ const patchItem = async ({ params, body }: RequestExt, res: Response): Promise<v
   }
 }
 
-const getSoldProductsByDateRangeCtrl = async ({ params }: RequestExt, res: Response): Promise<void> => {
+const getListBuyByDateRangeCtrl = async ({ params }: RequestExt, res: Response): Promise<void> => {
   try {
-    const { start, end } = params
-    const response = await getSoldProductsByDateRange(start, end)
+    const { start, end, prov } = params
+    console.log(start, end, prov)
+    const response = await getListBuyByDateRange(start, end, prov)
     res.send(response)
   } catch (e) {
-    handleHttp(res, 'ERROR_DELETE_ITEM')
+    handleHttp(res, 'ERROR_GET_LISTBUY')
   }
 }
 
-export { postItem, getItem, getItems, deleteItem, patchItem, getSoldProductsByDateRangeCtrl }
+const getListBuyAvgCtrl = async ({ params }: RequestExt, res: Response): Promise<void> => {
+  try {
+    const { prov } = params
+    const response = await getListBuyAvg(prov)
+    res.send(response)
+  } catch (e) {
+    handleHttp(res, 'ERROR_GET_LISTBUYAVG')
+  }
+}
+
+export { postItem, getItem, getItems, deleteItem, patchItem, getListBuyByDateRangeCtrl, getListBuyAvgCtrl }

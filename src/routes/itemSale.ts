@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { checkJwt } from '../middleware/session'
-import { deleteItem, getItem, getItems, getSoldProductsByDateRangeCtrl, patchItem, postItem } from '../controllers/itemSale'
+import { deleteItem, getItem, getItems, getListBuyAvgCtrl, getListBuyByDateRangeCtrl, patchItem, postItem } from '../controllers/itemSale'
+
 
 const router = Router()
 
@@ -9,6 +10,7 @@ router.get('/:id', checkJwt, getItem)
 router.post('/', checkJwt, postItem)
 router.patch('/:id', checkJwt, patchItem)
 router.delete('/:id', checkJwt, deleteItem)
-router.get('/soldProducts/:start/:end', getSoldProductsByDateRangeCtrl)
+router.get('/listbuy/:start/:end/:prov', getListBuyByDateRangeCtrl)
+router.get('/listbuyavg/:prov', getListBuyAvgCtrl)
 
 export { router }
