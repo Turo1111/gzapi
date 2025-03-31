@@ -4,6 +4,7 @@ import { getDailyData, getWeeklyData, getMonthlyData, getAnnuallyData, getDailyD
 
 const dailyCtrl = async (_: Request, res: Response): Promise<void> => {
   try {
+    console.log('dailyctrl')
     const response = await getDailyData()
     const response2 = await getDailyDataGraph()
     console.log({ simple: response, graph: response2 })
