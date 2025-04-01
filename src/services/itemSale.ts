@@ -39,6 +39,7 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
       {
         $project: {
           idVenta: 1,
+          _id: '$producto._id',
           idProducto: 1,
           cantidad: 1,
           total: 1,
@@ -189,65 +190,93 @@ const getListBuyByDateRange = async (start: string, end: string, prov: string): 
   const startDate = new Date(start);
   const endDate = new Date(end);
 
+  console.log(startDate, endDate)
+
   const response = await ItemSaleModel.aggregate([
     {
-      $match: {
-        createdAt: {
-          $gte: startDate,
-          $lte: endDate
+        $lookup: {
+          from: 'sales',
+          localField: 'idVenta',
+          foreignField: '_id',
+          as: 'venta'
         }
+      },
+      {
+        $unwind: '$venta'
+      },
+      {
+        $project: {
+          _id: 0,
+          idProducto: 1,
+          cantidad: 1,
+          idVenta: 1,
+          total: 1,
+          precioUnitario: 1,
+          estado: 1,
+          fechaVenta: '$venta.createdAt',
+          createdAt: 1
+        }
+      },
+      {
+        $match: {
+          fechaVenta: {
+            $gte: startDate,
+            $lte: endDate
+          },
+          estado: true
+        }
+      },
+      {
+        $group: {
+          _id: "$idProducto",
+          cantidad: { $sum: "$cantidad" },
+          createdAt: { $first: "$createdAt" }
+        }
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'producto'
+        }
+      },
+      {
+        $unwind: '$producto'
+      },
+    
+      {
+        $lookup: {
+          from: 'providers',
+          localField: 'producto.proveedor',
+          foreignField: '_id',
+          as: 'proveedor'
+        }
+      },
+      {
+        $unwind: '$proveedor'
+      },
+      {
+        $project: {
+          _id: 0,
+          idProducto: '$producto._id',
+          descripcion: '$producto.descripcion',
+          precio: '$producto.precioCompra',
+          proveedor: '$proveedor.descripcion',
+          cantidad: 1,
+          createdAt: "$createdAt",
+          total: {$multiply: ['$producto.precioCompra', '$cantidad' ]},
+          fechaVenta: 1,
+        }
+      },
+      {
+        $match: {
+          proveedor: prov,
+        }
+      },
+      {
+        $sort: { cantidad: -1 }
       }
-    },
-    {
-      $group: {
-        _id: "$idProducto",
-        cantidad: { $sum: "$cantidad" },
-        createdAt: { $first: "$createdAt" }
-      }
-    },
-    {
-      $lookup: {
-        from: 'products',
-        localField: '_id',
-        foreignField: '_id',
-        as: 'producto'
-      }
-    },
-    {
-      $unwind: '$producto'
-    },
-  
-    {
-      $lookup: {
-        from: 'providers',
-        localField: 'producto.proveedor',
-        foreignField: '_id',
-        as: 'proveedor'
-      }
-    },
-    {
-      $unwind: '$proveedor'
-    },
-    {
-      $project: {
-        _id: 0,
-        idProducto: '$producto._id',
-        descripcion: '$producto.descripcion',
-        precio: '$producto.precioCompra',
-        proveedor: '$proveedor.descripcion',
-        cantidad: 1,
-        createdAt: "$createdAt",
-        total: {$multiply: ['$producto.precioCompra', '$cantidad' ]}
-      }
-    },
-    {
-      $match: {
-        proveedor: prov,
-      }
-    },
-    {
-      $sort: { cantidad: -1 }
-    }
   ])
 
   return response
