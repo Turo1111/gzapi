@@ -4,6 +4,7 @@ import ItemSaleModel from '../models/itemSale'
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns'
 
 const insertItemSale = async (item: ItemSale): Promise<ItemSale> => {
+  console.log("insert item sale",item)
   const responseInsert = await ItemSaleModel.create(item)
   return responseInsert
 }
@@ -39,12 +40,12 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
       {
         $project: {
           idVenta: 1,
-          _id: '$producto._id',
+          _id: 1,
           idProducto: 1,
           cantidad: 1,
           total: 1,
           precioUnitario: 1,
-          precio: '$producto.precioUnitario',
+          precio: '$precioUnitario',
           descripcion: '$producto.descripcion',
           stock: '$producto.stock',
           peso: '$producto.peso',
@@ -65,6 +66,7 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
       },
       {
         $project: {
+          _id: 1, 
           estado: 1,
           idVenta: 1,
           idProducto: 1,
@@ -88,6 +90,7 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
 }
 
 const updateItemsSale = async (id: Types.ObjectId, item: Partial<ItemSale>): Promise<any> => {
+  console.log('update item sale', item, id)
   const response = await ItemSaleModel.updateOne({ _id: id }, { $set: item })
   return response
 }
@@ -261,11 +264,11 @@ const getListBuyByDateRange = async (start: string, end: string, prov: string): 
           _id: 0,
           idProducto: '$producto._id',
           descripcion: '$producto.descripcion',
-          precio: '$producto.precioCompra',
+          precio: { $ifNull: ['$producto.precioCompra', '$producto.precioUnitario'] },
           proveedor: '$proveedor.descripcion',
           cantidad: 1,
           createdAt: "$createdAt",
-          total: {$multiply: ['$producto.precioCompra', '$cantidad' ]},
+          total: {$multiply: [{ $ifNull: ['$producto.precioCompra', '$producto.precioUnitario'] }, '$cantidad' ]},
           fechaVenta: 1,
         }
       },

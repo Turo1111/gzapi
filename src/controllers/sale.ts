@@ -16,8 +16,9 @@ interface RequestExt extends Request {
 const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void> => {
   try {
     const response = await insertSale({ ...body, user: new Types.ObjectId(user.id) })
+    console.log('body del boy', body)
     await Promise.all(
-      body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id, estado: true, precioUnitario: item.precioUnitario }))
+      body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id, estado: true, precioUnitario: item.precio }))
     )
     emitSocket('sale', {
       action: 'create',
@@ -48,7 +49,7 @@ const postMultipleItem = async ({ body, user }: RequestExt, res: Response): Prom
               total: item.total,
               cantidad: item.cantidad,
               idVenta: response._id,
-              estado: true, precioUnitario: item.precioUnitario
+              estado: true, precioUnitario: item.precio
             })
           )
         )
@@ -97,15 +98,15 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
 const updateItem = async ({ params, body, user }: RequestExt, res: Response): Promise<void> => {
   try {
     const { id } = params
-    console.log(body)
     const response = await updateSale(new Types.ObjectId(id), { ...body, user: new Types.ObjectId(user.id) })
     await Promise.all(
       body.itemsSale.map(async (item: any) => {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (item.idVenta) {
-          await updateItemsSale(new Types.ObjectId(item._id), { ...item })
+          console.log("if updt", item)
+          await updateItemsSale(new Types.ObjectId(item._id), { ...item, precioUnitario: item.precio })
         } else {
-          await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id), estado: true, precioUnitario: item.precioUnitario })
+          await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id), estado: true, precioUnitario: item.precio })
         }
       })
     )
