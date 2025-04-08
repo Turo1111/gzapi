@@ -195,7 +195,7 @@ const printSale = async (req: Request, res: Response): Promise<void> => {
       }
 
       const descripcion = item.descripcion ?? 'Sin descripción'
-      const precioUnitario = item.precioUnitario ?? 0
+      const precioUnitario = (item.precio ? item.precio : item.precioUnitario) ?? 0
 
       // Agregar texto en las celdas
       doc.fillColor('black')
@@ -228,8 +228,7 @@ const printSale = async (req: Request, res: Response): Promise<void> => {
 
 const printSales = async (req: Request, res: Response): Promise<void> => {
   try {
-    const saleIds = req.body// Suponiendo que envías un arreglo de IDs en el cuerpo de la solicitud
-    /* const saleIds = ['66e8a74ca08a7f6affea9cb6'] */
+    const saleIds = req.body
     const sales: Sale[][] = await Promise.all(saleIds.map(async (id: any) => await getSale(new Types.ObjectId(id))))
     const itemsSales: ItemSale[][] = await Promise.all(saleIds.map(async (id: any) => await getItemSale(new Types.ObjectId(id))))
 
@@ -251,11 +250,9 @@ const printSales = async (req: Request, res: Response): Promise<void> => {
       let posicionGlobal = fixIndex + 1 // Índice basado en 1 (no en 0)
 
       if ((fixIndex) !== 0 && ((fixIndex) % 4) === 0) {
-        console.log('agregar pagina', fixIndex)
         doc.addPage()
       }
 
-      console.log('fixIndex', fixIndex)
       // Calcular la posición dentro de la tabla (fila y columna)
       let posicionEnTabla = (posicionGlobal - 1) % 4 // Rango de 0 a 3
       // Convertir la posición a filas y columnas
@@ -266,7 +263,6 @@ const printSales = async (req: Request, res: Response): Promise<void> => {
       let xPosition = (columna - 1) * invoiceWidth
       let yPosition = (fila - 1) * invoiceHeight
 
-      console.log(fila, columna, fixIndex, xPosition, yPosition, sale[0].cliente)
 
       // Encabezado de la factura
       const drawHeader = (): any => {
@@ -316,17 +312,18 @@ const printSales = async (req: Request, res: Response): Promise<void> => {
       const itemsSale = itemsSales[index] // Obtener los items correspondientes a la venta actual
       itemsSale.forEach((item: ItemSale, indexItemSale: number) => {
         const descripcion = item.descripcion ?? 'Sin descripción'
-        const precioUnitario = item.precioUnitario ?? 0
+
+        const precioUnitario = (item.precio ? item.precio : item.precioUnitario) ?? 0
+
+        console.log('prueba', precioUnitario, item)
 
         if (itemsCount === 18) {
           currentPage++
           fixIndex++
           posicionGlobal = fixIndex + 1
           if ((fixIndex) !== 0 && ((fixIndex) % 4) === 0) {
-            console.log('agregar pagina', fixIndex)
             doc.addPage()
           }
-          console.log('fixIndex', fixIndex)
           posicionEnTabla = (posicionGlobal - 1) % 4
           fila = Math.floor(posicionEnTabla / 2) + 1
           columna = (posicionEnTabla % 2) + 1
@@ -335,7 +332,6 @@ const printSales = async (req: Request, res: Response): Promise<void> => {
           tableTop = yPosition + 90
           yPositionProducts = tableTop
           itemsCount = 0
-          console.log(fila, columna, fixIndex, xPosition, yPosition, sale[0].cliente)
           drawHeader()
           drawTableHeaders()
         }

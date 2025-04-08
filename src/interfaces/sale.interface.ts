@@ -19,5 +19,6 @@ export interface ItemSale {
   total: number
   estado: boolean
   descripcion?: string
-  precioUnitario?: number
+  precioUnitario: number
+  precio?: number
 }
