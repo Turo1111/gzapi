@@ -44,7 +44,7 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
           idProducto: 1,
           cantidad: 1,
           total: 1,
-          precioUnitario: 1,
+          precioUnitario: '$producto.precioUnitario',
           precio: '$precioUnitario',
           descripcion: '$producto.descripcion',
           stock: '$producto.stock',
