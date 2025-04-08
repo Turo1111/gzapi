@@ -115,7 +115,11 @@ const getListBuyAvg = async (prov: string): Promise<any> => {
           createdAt: {
             $gte: startDate,
             $lte: endDate
-          }
+          },
+          $or: [
+            { estado: true },
+            { estado: { $exists: false } }
+          ]
         }
       },
       {
@@ -226,7 +230,10 @@ const getListBuyByDateRange = async (start: string, end: string, prov: string): 
             $gte: startDate,
             $lte: endDate
           },
-          estado: true
+          $or: [
+            { estado: true },
+            { estado: { $exists: false } }
+          ]
         }
       },
       {

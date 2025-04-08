@@ -86,11 +86,13 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
 
   if (categories !== undefined) {
     if (categories?.length !== 0) {
-      query = { categoria: { $in: categories } }
+      query = { NameCategoria: { $in: categories } }
     }
   } else {
     query = {}
   }
+
+  console.log('query', query)
 
   return await ProductModel.aggregate([
     {
