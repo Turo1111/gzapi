@@ -141,9 +141,9 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
         precioCompra: 1,
         precioUnitario: 1,
         precioDescuento: 1,
-        idCategoria: '$categoria._id',
-        idProveedor: '$proveedor._id',
-        idMarca: '$marca._id',
+        categoria: '$categoria._id',
+        proveedor: '$proveedor._id',
+        marca: '$marca._id',
         NameCategoria: '$categoria.descripcion',
         NameProveedor: '$proveedor.descripcion',
         NameMarca: '$marca.descripcion'

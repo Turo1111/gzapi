@@ -182,7 +182,6 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
     const { categories, isPrecioUnitario } = body/* 
     console.log('isPrecioUnitario', isPrecioUnitario, categories) */
     const products = await getAllProductsCategories(categories)
-    console.log(products)
     if (products.length === 0) {
       res.status(404).send('Products not found')
       return
@@ -247,4 +246,71 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
   }
 }
 
-export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage, getAllItems, getNothing, printList }
+const printListWithDiscount = async ({ body }: RequestExt, res: Response): Promise<void> => {
+  try {
+    const { categories, discount } = body
+    const products = await getAllProductsCategories([])
+
+    if (products.length === 0) {
+      res.status(404).send('Products not found')
+      return
+    }
+    const doc = new PDFDocument()
+    res.setHeader('Content-disposition', 'attachment; filename=ListaDePrecios.pdf')
+    res.setHeader('Content-type', 'application/pdf')
+    doc.pipe(res)
+    const logoPath = path.join(__dirname, '../../public/image/LOGO.png')
+    doc.image(logoPath, 450, 5, { width: 100 })
+    let categorieActive: (string | undefined) = ''
+
+    products.forEach((itemProduct: Product)=>{
+      if (itemProduct.NameCategoria !== categorieActive) {
+        categorieActive = itemProduct.NameCategoria
+        doc.fontSize(18).font('Helvetica-Bold').fillColor('#3764A0')
+        .text(`${categorieActive}`, 25)
+      }
+      
+      const yPosition = doc.y;
+
+      // Escribir la descripción del producto
+      doc.fontSize(14).font('Helvetica').fillColor('black')
+        .text(`${itemProduct.descripcion}`, 50, yPosition);
+
+      // Calcular el precio con descuento si el producto pertenece a una categoría seleccionada
+      let precioFinal = itemProduct.precioUnitario;
+      if (categories.includes(itemProduct.NameCategoria)) {
+        console.log('itemProduct.categoria', itemProduct.categoria, 'discount', discount)
+        precioFinal = itemProduct.precioUnitario * (1 - discount);
+      }
+
+      // Escribir el precio del producto en la misma posición Y
+      doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50')
+            .text(`$ ${precioFinal.toFixed(2)}`, 440, yPosition);
+      
+      doc.moveDown(0.1);
+
+      doc.lineWidth(0.5);
+      doc.strokeColor('#d9d9d9');
+
+      doc.moveTo(20, doc.y)
+      .lineTo(550, doc.y)
+      .stroke();
+
+      doc.moveDown(0.3);
+
+      if (yPosition > 680) {
+        doc.addPage()
+      }
+
+      doc.on('pageAdded', () => doc.image(logoPath, 450, 5, { width: 100 }));
+    })
+    
+    // Finalizar el documento
+    doc.end()
+    
+  } catch (e) {
+    handleHttp(res, 'ERROR_PRINT_LIST')
+  }
+}
+
+export { getItem, getItems, uptdateItem, postItem, deleteItem, uptdateItems, uploadImage, getImage, getAllItems, getNothing, printList, printListWithDiscount }
