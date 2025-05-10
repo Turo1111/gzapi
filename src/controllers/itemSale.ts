@@ -64,7 +64,6 @@ const patchItem = async ({ params, body }: RequestExt, res: Response): Promise<v
 const getListBuyByDateRangeCtrl = async ({ params }: RequestExt, res: Response): Promise<void> => {
   try {
     const { start, end, prov } = params
-    console.log(start, end, prov)
     const response = await getListBuyByDateRange(start, end, prov)
     res.send(response)
   } catch (e) {

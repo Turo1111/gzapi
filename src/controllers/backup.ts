@@ -9,8 +9,6 @@ const backupCtrl = async (_: Request, res: Response): Promise<void> => {
     const PASS = process.env.PASS as string;
     const backupPath = path.join(__dirname, '../../backups'); // Ruta absoluta a la carpeta backups
 
-    console.log(BACKUP_URI, USER, PASS)
-
     // Verificar si la carpeta de backups existe, si no, crearla
     if (!fs.existsSync(backupPath)) {
         fs.mkdirSync(backupPath, { recursive: true });
@@ -27,9 +25,6 @@ const backupCtrl = async (_: Request, res: Response): Promise<void> => {
             console.error(`stderr: ${stderr}`);
             return res.status(500).send('Error generando el backup');
         }
-
-        console.log(`stdout: ${stdout}`);
-        console.warn(`stderr: ${stderr}`); // Mostrar stderr si no contiene "error"
         return res.send('Backup generado exitosamente');
     });
 };
@@ -39,8 +34,6 @@ const restoreCtrl = async (_: Request, res: Response): Promise<void> => {
     const USER = process.env.USER as string;
     const PASS = process.env.PASS as string;
     const backupPath = path.join(__dirname, '../../backups/test'); // Ruta absoluta a la carpeta donde están los backups
-
-    console.log(BACKUP_URI, USER, PASS)
 
     // Verificar si el directorio de backups existe
     if (!fs.existsSync(backupPath)) {
@@ -59,9 +52,6 @@ const restoreCtrl = async (_: Request, res: Response): Promise<void> => {
             console.error(`stderr: ${stderr}`);
             return res.status(500).send('Error restaurando el backup');
         }
-
-        console.log(`stdout: ${stdout}`);
-        console.warn(`stderr: ${stderr}`); // Mostrar stderr si no contiene "error"
         return res.send('Backup restaurado exitosamente');
     });
 };

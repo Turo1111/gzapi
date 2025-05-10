@@ -16,7 +16,6 @@ interface RequestExt extends Request {
 const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void> => {
   try {
     const response = await insertSale({ ...body, user: new Types.ObjectId(user.id) })
-    console.log('body del boy', body)
     await Promise.all(
       body.itemsSale.map(async (item: any) => await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: response._id, estado: true, precioUnitario: item.precio }))
     )
@@ -32,11 +31,8 @@ const postItem = async ({ body, user }: RequestExt, res: Response): Promise<void
 
 const postMultipleItem = async ({ body, user }: RequestExt, res: Response): Promise<void> => {
   try {
-    console.log(user)
-    /* const response = await insertSale({ ...body, user: new Types.ObjectId(user.id) }) */
     await Promise.all(
       body.map(async (item: any) => {
-        console.log({ ...item, user: new Types.ObjectId(user.id) })
 
         // Ejecutar insertSale y esperar a que termine antes de continuar con insertItemSale
         const response = await insertSale({ ...item, user: new Types.ObjectId(user.id) })
@@ -68,7 +64,6 @@ const postMultipleItem = async ({ body, user }: RequestExt, res: Response): Prom
 
 const getItem = async ({ params }: RequestExt, res: Response): Promise<void> => {
   try {
-    console.log('aca')
     const { id } = params
     const response = await getSale(new Types.ObjectId(id))
     const response2 = await getItemSale(new Types.ObjectId(id))
@@ -103,7 +98,6 @@ const updateItem = async ({ params, body, user }: RequestExt, res: Response): Pr
       body.itemsSale.map(async (item: any) => {
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (item.idVenta) {
-          console.log("if updt", item)
           await updateItemsSale(new Types.ObjectId(item._id), { ...item, precioUnitario: item.precio })
         } else {
           await insertItemSale({ idProducto: item._id, total: item.total, cantidad: item.cantidad, idVenta: new Types.ObjectId(id), estado: true, precioUnitario: item.precio })
@@ -123,7 +117,6 @@ const updateItem = async ({ params, body, user }: RequestExt, res: Response): Pr
 const printSale = async (req: Request, res: Response): Promise<void> => {
   try {
     const saleId = new Types.ObjectId(req.params.id)
-    console.log(saleId)
     const sale: Sale[] = await getSale(saleId)
 
     if (sale.length === 0) {
@@ -132,8 +125,6 @@ const printSale = async (req: Request, res: Response): Promise<void> => {
     }
 
     const itemsSale: ItemSale[] = await getItemSale(saleId)
-
-    console.log(itemsSale)
     
     const doc = new PDFDocument()
 
@@ -314,8 +305,6 @@ const printSales = async (req: Request, res: Response): Promise<void> => {
         const descripcion = item.descripcion ?? 'Sin descripción'
 
         const precioUnitario = (item.precio ? item.precio : item.precioUnitario) ?? 0
-
-        console.log('prueba', precioUnitario, item)
 
         if (itemsCount === 18) {
           currentPage++

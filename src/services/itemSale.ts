@@ -4,7 +4,6 @@ import ItemSaleModel from '../models/itemSale'
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns'
 
 const insertItemSale = async (item: ItemSale): Promise<ItemSale> => {
-  console.log("insert item sale",item)
   const responseInsert = await ItemSaleModel.create(item)
   return responseInsert
 }
@@ -90,7 +89,6 @@ const getItemSale = async (id: Types.ObjectId): Promise<any> => {
 }
 
 const updateItemsSale = async (id: Types.ObjectId, item: Partial<ItemSale>): Promise<any> => {
-  console.log('update item sale', item, id)
   const response = await ItemSaleModel.updateOne({ _id: id }, { $set: item })
   return response
 }
@@ -105,8 +103,6 @@ const getListBuyAvg = async (prov: string): Promise<any> => {
   const hoy = new Date();
   const startDate = startOfWeek(subWeeks(hoy, 4));
   const endDate = endOfWeek(subWeeks(hoy, 1));
-
-  console.log('avg', startDate, endDate)
 
   try {
     const result = await ItemSaleModel.aggregate([
@@ -196,8 +192,6 @@ const getListBuyByDateRange = async (start: string, end: string, prov: string): 
 
   const startDate = new Date(start);
   const endDate = new Date(end);
-
-  console.log(startDate, endDate)
 
   const response = await ItemSaleModel.aggregate([
     {

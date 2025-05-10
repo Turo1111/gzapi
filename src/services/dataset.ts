@@ -46,8 +46,6 @@ const getDailyData = async (): Promise<Response[]> => {
     }
   ])
 
-  console.log( "fechas before" ,startBefore, endBefore)
-
   const responseSaleBefore = await SaleModel.aggregate([
     {
       $match: {

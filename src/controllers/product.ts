@@ -179,8 +179,7 @@ const getAllItems = async (_: RequestExt, res: Response): Promise<void> => {
 
 const printList = async ({ body }: RequestExt, res: Response): Promise<void> => {
   try {
-    const { categories, isPrecioUnitario } = body/* 
-    console.log('isPrecioUnitario', isPrecioUnitario, categories) */
+    const { categories, isPrecioUnitario } = body
     const products = await getAllProductsCategories(categories)
     if (products.length === 0) {
       res.status(404).send('Products not found')
@@ -193,6 +192,9 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
     const logoPath = path.join(__dirname, '../../public/image/LOGO.png')
     doc.image(logoPath, 450, 5, { width: 100 })
     let categorieActive: (string | undefined) = ''
+
+    // Agregar el listener solo una vez
+    doc.on('pageAdded', () => doc.image(logoPath, 450, 5, { width: 100 }));
 
     products.forEach((itemProduct: Product)=>{
       if (itemProduct.NameCategoria !== categorieActive) {
@@ -235,8 +237,6 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
       if (yPosition > 680) {
         doc.addPage()
       }
-
-      doc.on('pageAdded', () => doc.image(logoPath, 450, 5, { width: 100 }));
     })
     
     // Finalizar el documento
@@ -248,8 +248,15 @@ const printList = async ({ body }: RequestExt, res: Response): Promise<void> => 
 
 const printListWithDiscount = async ({ body }: RequestExt, res: Response): Promise<void> => {
   try {
-    const { categories, discount } = body
-    const products = await getAllProductsCategories([])
+    const { categories, discount }: { categories: {conDescuento: {_id: string, descripcion: string}[], sinDescuento: {_id: string, descripcion: string}[] }, discount: number } = body
+    let categoriesArray: string[] = []
+    categories.conDescuento.forEach(item=>{
+      categoriesArray.push(item.descripcion)
+    })
+    categories.sinDescuento.forEach(item=>{
+      categoriesArray.push(item.descripcion)
+    })
+    const products = await getAllProductsCategories(categoriesArray)
 
     if (products.length === 0) {
       res.status(404).send('Products not found')
@@ -262,6 +269,9 @@ const printListWithDiscount = async ({ body }: RequestExt, res: Response): Promi
     const logoPath = path.join(__dirname, '../../public/image/LOGO.png')
     doc.image(logoPath, 450, 5, { width: 100 })
     let categorieActive: (string | undefined) = ''
+
+    // Agregar el listener solo una vez
+    doc.on('pageAdded', () => doc.image(logoPath, 450, 5, { width: 100 }));
 
     products.forEach((itemProduct: Product)=>{
       if (itemProduct.NameCategoria !== categorieActive) {
@@ -278,11 +288,13 @@ const printListWithDiscount = async ({ body }: RequestExt, res: Response): Promi
 
       // Calcular el precio con descuento si el producto pertenece a una categoría seleccionada
       let precioFinal = itemProduct.precioUnitario;
-      if (categories.includes(itemProduct.NameCategoria)) {
-        console.log('itemProduct.categoria', itemProduct.categoria, 'discount', discount)
+      let isDescuento = categories.conDescuento.find(elem=>elem.descripcion === itemProduct.NameCategoria) ? true : false
+      let isNormal = categories.sinDescuento.find(elem=>elem.descripcion === itemProduct.NameCategoria) ? true : false
+      if (isDescuento) {
         precioFinal = itemProduct.precioUnitario * (1 - discount);
+      } else if (isNormal) {
+        precioFinal = itemProduct.precioUnitario
       }
-
       // Escribir el precio del producto en la misma posición Y
       doc.fontSize(14).font('Helvetica-Bold').fillColor('#FA9B50')
             .text(`$ ${precioFinal.toFixed(2)}`, 440, yPosition);
@@ -301,8 +313,6 @@ const printListWithDiscount = async ({ body }: RequestExt, res: Response): Promi
       if (yPosition > 680) {
         doc.addPage()
       }
-
-      doc.on('pageAdded', () => doc.image(logoPath, 450, 5, { width: 100 }));
     })
     
     // Finalizar el documento

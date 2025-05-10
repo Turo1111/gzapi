@@ -79,7 +79,7 @@ const getAllProducts = async (): Promise<Product[]> => {
   )
 }
 
-const getAllProductsCategories = async (categories: [] | undefined): Promise<any[]> => {
+const getAllProductsCategories = async (categories: string[] | undefined): Promise<any[]> => {
   let query: any = {
 
   }
@@ -91,8 +91,6 @@ const getAllProductsCategories = async (categories: [] | undefined): Promise<any
   } else {
     query = {}
   }
-
-  console.log('query', query)
 
   return await ProductModel.aggregate([
     {
@@ -274,8 +272,6 @@ const getProductsSearch = async (input: string, filter: Filter): Promise<Product
   if (filter.categoria !== undefined || filter.marca !== undefined || filter.proveedor !== undefined) {
     query = Object.assign({}, query, filter)
   }
-
-  console.log(query)
 
   return await ProductModel.aggregate(
     [

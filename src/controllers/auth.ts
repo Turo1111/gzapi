@@ -7,7 +7,6 @@ const registerCtrl = async ({ body }: Request, res: Response): Promise<void> => 
 }
 
 const loginCtrl = async ({ body }: Request, res: Response): Promise<void> => {
-  console.log("aca", body)
   const responseUser = await loginUser(body)
   res.send(responseUser)
 }

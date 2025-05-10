@@ -61,7 +61,6 @@ const getItems = async ({ body }: RequestExt, res: Response): Promise<void> => {
 const updateItem = async ({ params, body, user }: RequestExt, res: Response): Promise<void> => {
   try {
     const { id } = params
-    console.log(body)
     const response = await updateBuy(new Types.ObjectId(id), { ...body, user: new Types.ObjectId(user.id) })
     await Promise.all(
       body.itemsBuy.map(async (item: any) => {
